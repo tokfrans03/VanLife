@@ -1,18 +1,38 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <v-card dark class="my-2">
+      <v-card-title>Control Panel</v-card-title>
+      <v-card-actions>
+        <v-btn color="success" @click="Get()">Get data</v-btn>
+      </v-card-actions>
+    </v-card>
+    <v-card>
+      
+    </v-card>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
+import axios from "axios";
 
 export default {
-  name: 'Home',
-  components: {
-    HelloWorld
+  name: "home",
+  components: {},
+  created() {},
+  data: () => ({
+    Backend_Url: "http://192.168.0.67/",
+    config: {}
+  }),
+  methods: {
+    Get() {
+      axios
+        .get(this.Backend_Url)
+        .then(response => {
+          console.log(response)
+          this.config = response
+        });
+    }
   }
-}
+};
 </script>

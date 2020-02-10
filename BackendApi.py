@@ -20,6 +20,7 @@ class S(BaseHTTPRequestHandler):
     def send_res(self, args, code=200):
         self.send_response(code)
         self.send_header('Content-type', 'text/html')
+        self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
         self.wfile.write(json.dumps(args).encode('utf-8'))
 
