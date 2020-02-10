@@ -1,0 +1,10 @@
+{
+    "mqtt": {
+        "url": "https://www.maqiatto.com/",
+        "port": 1883,
+        "user": "",
+        "pass": "",
+        "topics": [""]
+    },
+    "frukter": ["äpplen", "päron"]
+}
