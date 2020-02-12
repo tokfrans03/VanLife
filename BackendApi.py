@@ -30,8 +30,12 @@ class S(BaseHTTPRequestHandler):
         print(self.headers)
 
         if self.path == "/":
-            self.send_res({"Allowed-Methods": manifest})
+            self.send_res({"config": config})
             return
+
+        # if self.path == "/":
+        #     self.send_res({"Allowed-Methods": manifest})
+        #     return
 
         if self.path in manifest:
             databack = config[self.path[1:]]
@@ -40,6 +44,8 @@ class S(BaseHTTPRequestHandler):
 
         if self.path == "/refresh":
             refreshConfig()
+            self.send_res("")
+            return
 
         self.send_res("No such method", code=404)
 
