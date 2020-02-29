@@ -48,6 +48,7 @@ def checkbody(body):
 
 class S(BaseHTTPRequestHandler):
     def send_res(self, args, code=200, Success=True):
+        
         self.send_response(code)
         self.send_header('Content-type', 'text/html')
         self.send_header('Access-Control-Allow-Origin', '*')

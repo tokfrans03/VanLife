@@ -4,29 +4,40 @@
       <v-card-title>Control Panel</v-card-title>
       <v-text-field label="Backend Url" v-model="Backend_Url" class="mx-4"></v-text-field>
       <v-card-actions>
-        <v-btn color="yellow" @click="refreshconfig()">Refresh Backend</v-btn>
-        <v-btn
-          :disabled="Object.entries(config).length === 0"
-          @click="connect()"
-          color="success"
-        >connect</v-btn>
-        <v-btn color="success" :disabled="!check()" @click="sub()">subscribe</v-btn>
-        <v-btn color="primary" @click="cons()">Console</v-btn>
+        <v-row align="start" justify="space-between">
+          <v-col v-if="retry" cols="auto">
+            <v-btn @click="Get()" color="error">Retry</v-btn>
+          </v-col>
+          <v-col cols="auto">
+            <v-btn class="ma-2" color="yellow" @click="refreshconfig()">Refresh Backend</v-btn>
+            <v-btn class="ma-2" color="primary" @click="cons()">Console</v-btn>
+          </v-col>
+          <v-col cols="auto">
+            <v-btn
+              :disabled="Object.entries(config).length === 0"
+              @click="connect()"
+              color="success"
+              class="ma-2"
+            >connect</v-btn>
+            <v-btn class="ma-2" color="success" :disabled="!check()" @click="sub()">subscribe</v-btn>
+          </v-col>
+        </v-row>
       </v-card-actions>
       <v-alert class="ma-4" type="success" :value="this.Alert">{{Alerttext}}</v-alert>
     </v-card>
     <v-card>
       <v-card-title primary-title>
+        <v-icon >lightbulb-on</v-icon> 
         <div>
-          <h3 class="headline mb-0">Lampor</h3>
-          <div>Kontrolera lamporna med dessa knappar</div>
+          <!-- <v-icon v-if="config.lamp">mdi-lightbulb-on</v-icon> <v-icon v-else>mdi-lightbulb-off</v-icon> -->
+          <h3 class="headline mb-0">Lampor </h3>
+          <div>Kontrolera lamporna med dessa knappar </div>
         </div>
       </v-card-title>
       <v-card-actions>
-        <v-btn text @click="send(4353281)" primary>on/off</v-btn>
-        <v-btn text @click="send(4353287)" primary>100%</v-btn>
-       <v-btn text @click="send(4353288)" primary>50%</v-btn>  <!-- Needs better solution -->
-        <v-btn text @click="send(4353289)" primary>25%</v-btn>
+        <v-row align="start" justify="space-between">
+          <v-btn v-for="(x, i) in config.codes" :key="`${i}-${x}`" text @click="send(x.code)" primary>{{x.name}}</v-btn>
+        </v-row>
       </v-card-actions>
     </v-card>
     <v-snackbar v-model="snacc">
@@ -54,7 +65,8 @@ export default {
     snacc: false,
     snacc_text: "",
     Alert: false,
-    Alerttext: ""
+    Alerttext: "",
+    retry: false,
   }),
   async mounted() {
     this.Get();
@@ -68,10 +80,13 @@ export default {
           this.config = response.data.value.config;
           this.snacc_text = "Loaded config";
           this.snacc = true;
+          this.retry = false;
         })
         .catch(error => {
+          // console.log(error);
           this.snacc_text = "Unable to get config";
           this.snacc = true;
+          this.retry = true;
         });
     },
     refreshconfig() {
