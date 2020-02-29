@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
-# from send import send
+from send import send
 port = 8000
 config = {}
 manifest = []
@@ -58,9 +58,18 @@ class S(BaseHTTPRequestHandler):
         }
         self.wfile.write(json.dumps(out).encode('utf-8'))
 
+    def do_OPTIONS(self):
+        print("\nPath:", str(self.path),
+              "\nHeaders:\n" + str(self.headers))
+        self.send_response(200, "ok")
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header("Access-Control-Allow-Headers", "*")
+        self.end_headers()
+
     def do_GET(self):
 
-        print("Path:", self.path)
+        print("\nPath:", self.path)
         print(self.headers)
 
         if self.path == "/":
@@ -97,13 +106,17 @@ class S(BaseHTTPRequestHandler):
         # <--- Gets the data itself
         post_data = self.rfile.read(content_length)
         # print(json.loads(post_data.decode('utf-8')))
-        print("POST request,\nPath:", str(self.path),
+        print("\nPath:", str(self.path),
               "\nHeaders:\n" + str(self.headers))
+        print(content_length)
         if content_length > 0:
             body = post_data.decode('utf-8')
             print("Body:\n" + post_data.decode('utf-8'), "\n")
             if checkbody(body)[0] == True:  # all good
 
+                body = json.loads(body)
+                if body["action"] == "rf":
+                    send(body["value"])
                 # TODO
 
                 self.send_res("Done")
@@ -115,7 +128,7 @@ class S(BaseHTTPRequestHandler):
 
         else:
             self.send_res(
-                "POST request for {} . Please send a body".format(self.path))
+                "POST request for {} . Please send a body".format(self.path), Success=False)
 
 
 def run(server_class=HTTPServer, handler_class=S, port=port):
