@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-toolbar dark>
-      <v-toolbar-title>WindWhisperer</v-toolbar-title>
+      <v-toolbar-title>Vanlife</v-toolbar-title>
 
       <v-spacer></v-spacer>
 

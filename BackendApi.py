@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
+# from send import send
 port = 8000
 config = {}
 manifest = []
+Allowed_actions = ["rf", "get"]
+
 
 def refreshConfig():
     global config
@@ -14,15 +17,46 @@ def refreshConfig():
         for x in config:
             manifest.append("/" + x)
 
+
 refreshConfig()
 
+
+def checkbody(body):
+    try:
+        try:
+            body = json.loads(body)
+        except:
+            return [False, "Unable to parse json"]
+
+        if "action" not in body:
+            return [False, "No 'action' in body"]
+
+        if "value" not in body:
+            return [False, "No 'value' in body"]
+
+        if body["action"] not in Allowed_actions:
+            return [False, "Action '" + body["action"] + "' not allowed"]
+
+        if body["action"] == "rf":
+            if type(body["value"]) != int:
+                return [False, "rf value must be an int"]
+
+        return [True]
+    except:
+        return [False, "unknown error"]
+
+
 class S(BaseHTTPRequestHandler):
-    def send_res(self, args, code=200):
+    def send_res(self, args, code=200, Success=True):
         self.send_response(code)
         self.send_header('Content-type', 'text/html')
         self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
-        self.wfile.write(json.dumps(args).encode('utf-8'))
+        out = {
+            "Success": Success,
+            "value": args
+        }
+        self.wfile.write(json.dumps(out).encode('utf-8'))
 
     def do_GET(self):
 
@@ -49,25 +83,40 @@ class S(BaseHTTPRequestHandler):
 
         self.send_res("No such method", code=404)
 
-
         # if self.path == "/mqtt":
         #     self._set_response(data)
         # else:
         #     self._set_response()
 
-
         # print("GET request,\nPath: %s\nHeaders:\n%s\n", str(self.path), str(self.headers))
         # self.wfile.write("GET request for {}".format(self.path).encode('utf-8'))
 
-    
-    # def do_POST(self):
-    #     content_length = int(self.headers['Content-Length']) # <--- Gets the size of data
-    #     post_data = self.rfile.read(content_length) # <--- Gets the data itself
-    #     print("POST request,\nPath: %s\nHeaders:\n%s\n\nBody:\n%s\n",
-    #             str(self.path), str(self.headers), post_data.decode('utf-8'))
+    def do_POST(self):
+        # <--- Gets the size of data
+        content_length = int(self.headers['Content-Length'])
+        # <--- Gets the data itself
+        post_data = self.rfile.read(content_length)
+        # print(json.loads(post_data.decode('utf-8')))
+        print("POST request,\nPath:", str(self.path),
+              "\nHeaders:\n" + str(self.headers))
+        if content_length > 0:
+            body = post_data.decode('utf-8')
+            print("Body:\n" + post_data.decode('utf-8'), "\n")
+            if checkbody(body)[0] == True:  # all good
 
-    #     self.send_res()
-    #     self.wfile.write("POST request for {}".format(self.path).encode('utf-8'))
+                # TODO
+
+                self.send_res("Done")
+
+            else:  # Body is wrong
+
+                print(checkbody(body)[1])
+                self.send_res(checkbody(body)[1], Success=False)
+
+        else:
+            self.send_res(
+                "POST request for {} . Please send a body".format(self.path))
+
 
 def run(server_class=HTTPServer, handler_class=S, port=port):
     server_address = ('', port)
@@ -79,6 +128,7 @@ def run(server_class=HTTPServer, handler_class=S, port=port):
         pass
     httpd.server_close()
     print('\nStopping httpd...')
+
 
 if __name__ == '__main__':
     from sys import argv

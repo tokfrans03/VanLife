@@ -32,7 +32,7 @@ export default {
   components: {},
   created() {},
   data: () => ({
-    Backend_Url: "http://localhost:8000/",
+    Backend_Url: "http://192.168.0.97/",
     config: {},
     connected: false,
     client: undefined,
@@ -56,10 +56,15 @@ export default {
         });
     },
     refreshconfig() {
-      axios.get(this.Backend_Url + "refresh").catch(error => {
-        this.snacc_text += "reach backend";
-        this.snacc = true;
-      });
+      axios
+        .get(this.Backend_Url + "refresh")
+        .catch(error => {
+          this.snacc_text += "reach backend";
+          this.snacc = true;
+        })
+        .then(response => {
+          this.Get();
+        });
     },
     check() {
       if (this.client) {
@@ -112,11 +117,9 @@ export default {
       this.snacc = true;
     },
     cons() {
+      console.log(this.config);
       if (this.check()) {
-        this.client.publish(
-          this.config.mqtt.topics[0],
-          "HHHHHHeeelooooo"
-        );
+        this.client.publish(this.config.mqtt.topics[0], "HHHHHHeeelooooo");
       }
     }
   }
