@@ -7,17 +7,24 @@ import paho.mqtt.client as mqtt
 back_url = "http://192.168.0.97/"
 url = "maqiatto.com"
 port = 1883
-id = 1
 
 config = json.loads(requests.get(back_url).text)["value"]["config"]
 # print(type(config) , config)
 
 
 def send_res(args, Success=True):
-    global id
-    id += 1
-    args["id"] = id
-    out = json.dumps(args)
+
+    if Success == True: 
+        args["Role"] = "Response"
+        out = json.dumps(args)
+
+    else: # error came from this scripts
+        out = json.dumps({
+            "Success": Success,
+            "value": args,
+            "Role": "Response"
+        })
+
     print("Sending", out)
 
     client.publish(config["mqtt"]["topics"][0], out)
@@ -42,13 +49,14 @@ def on_message(client, userdata, msg):
         req = json.loads(str(msg.payload.decode("utf-8")))
         # print("good json")
     except:  # not json
-        print("not json")
-        send_res("not json", Success=False)
+        print("Unable to parse json")
+        send_res("Unable to parse json", Success=False)
         return
 
-    if "id" in req:  # no dupes
-        # print("no dupes pls")
-        return
+    if "Role" in req:  # no dupes
+        if req["Role"] == "Response":
+            # print("no dupes pls")
+            return
 
     res = json.loads(requests.post(back_url, json.dumps(req)).text)
 

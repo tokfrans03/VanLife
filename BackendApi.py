@@ -34,6 +34,9 @@ def checkbody(body):
         if "value" not in body:
             return [False, "No 'value' in body"]
 
+        if type(body["action"]) != str:
+            return [False, "'action' value must be a string"]
+
         if body["action"] not in Allowed_actions:
             return [False, "Action '" + body["action"] + "' not allowed"]
 
