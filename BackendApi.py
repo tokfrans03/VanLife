@@ -1,11 +1,32 @@
 #!/usr/bin/env python3
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
-from send import send
+# from send import send
+import requests
 port = 8000
 config = {}
 manifest = []
-Allowed_actions = ["rf", "get"]
+Allowed_actions = ["rf", "get", "notif"]
+
+def sendnotif(title, message, image=""):
+    
+    urls = []
+    names = []
+
+    for x in config["notif"]:
+        names.append(x["name"])
+        urls.append("https://api.pushmealert.com?user="+x["user"]+"&key="+x["key"]+"&title="+title+"&message="+message)
+    
+    for url in urls:
+        res = json.loads(requests.get(url).text)
+        if res["status"] != 1:
+            return [False]
+    names = ", ".join(names)
+    return [True, "Sent to " + names]
+    
+    # if image == "":
+    # else:
+    #     url = "https://api.pushmealert.com?user="+user+"&key="+key+"&title="+title+"&message="+message+"&image=" + image
 
 
 def refreshConfig():
@@ -19,7 +40,6 @@ def refreshConfig():
 
 
 refreshConfig()
-
 
 def checkbody(body):
     try:
@@ -40,9 +60,17 @@ def checkbody(body):
         if body["action"] not in Allowed_actions:
             return [False, "Action '" + body["action"] + "' not allowed"]
 
-        if body["action"] == "rf":
+        if body["action"] == "rf": # checks for rf values
             if type(body["value"]) != int:
                 return [False, "rf value must be an int"]
+        
+        if body["action"] == "notif": # checks for notif 
+            if type(body["value"]) != dict:
+                return [False, "Value must be a dict contaning a title and message"]
+            if "title" not in body["value"]:
+                return [False, "Value must contain a title"]
+            if "message" not in body["value"]:
+                return [False, "Value must contain a message"]
 
         return [True]
     except:
@@ -53,7 +81,7 @@ class S(BaseHTTPRequestHandler):
     def send_res(self, args, code=200, Success=True):
         
         self.send_response(code)
-        self.send_header('Content-type', 'text/html')
+        self.send_header('Content-type', 'application/json')
         self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
         out = {
@@ -115,15 +143,29 @@ class S(BaseHTTPRequestHandler):
         print(content_length)
         if content_length > 0:
             body = post_data.decode('utf-8')
-            print("Body:\n" + post_data.decode('utf-8'), "\n")
+            print("Body:\n" + body, "\n")
             if checkbody(body)[0] == True:  # all good
-
                 body = json.loads(body)
                 if body["action"] == "rf":
                     send(body["value"])
                 # TODO
+                elif body["action"] == "notif":
+                    try:
+                        body = body["value"]
+                        if "imgurl" in body:
+                            res = sendnotif(body["title"], body["message"], image=body["imgurl"])
+                        else:
+                            res = sendnotif(body["title"], body["message"])
+                        if res[0]:
+                            self.send_res(res[1]) # success
+                        else: # error
+                            self.send_res(res[1], Success=False, code=201) 
+                        return
 
-                self.send_res("Done")
+                    except Exception as e:
+                        print(e)
+                        self.send_res("Something went wrong", code=500, Success=False)
+                        return
 
             else:  # Body is wrong
 

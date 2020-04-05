@@ -11,6 +11,19 @@
           <v-col cols="auto">
             <v-btn class="ma-2" color="yellow" @click="refreshconfig()">Refresh Backend</v-btn>
             <v-btn class="ma-2" color="primary" @click="cons()">Console</v-btn>
+            <v-dialog v-model="dialog" width="500">
+              <template v-slot:activator="{ on }">
+                <v-btn color="green" dark v-on="on">Skicka medelande</v-btn>
+              </template>
+              <v-form class="pa-4">
+                <v-text-field name="url" label="url" v-model="Backend_Url"></v-text-field>
+                <v-text-field name="title" label="Titel" v-model="title"></v-text-field>
+                <v-text-field name="message" label="Medelande" v-model="message"></v-text-field>
+                <v-text-field name="img" label="Bild URL" v-model="img"></v-text-field>
+                <v-btn color="success" :loading="loading" @click="send_notif()">send</v-btn>
+              </v-form>
+              <v-alert :color="response_color" :value="Boolean(response)">{{response}}</v-alert>
+            </v-dialog>
           </v-col>
           <v-col cols="auto">
             <v-btn
@@ -27,16 +40,22 @@
     </v-card>
     <v-card>
       <v-card-title primary-title>
-        <v-icon >lightbulb-on</v-icon> 
+        <v-icon>lightbulb-on</v-icon>
         <div>
           <!-- <v-icon v-if="config.lamp">mdi-lightbulb-on</v-icon> <v-icon v-else>mdi-lightbulb-off</v-icon> -->
-          <h3 class="headline mb-0">Lampor </h3>
-          <div>Kontrolera lamporna med dessa knappar </div>
+          <h3 class="headline mb-0">Lampor</h3>
+          <div>Kontrolera lamporna med dessa knappar</div>
         </div>
       </v-card-title>
       <v-card-actions>
         <v-row align="start" justify="space-between">
-          <v-btn v-for="(x, i) in config.codes" :key="`${i}-${x}`" text @click="send(x.code)" primary>{{x.name}}</v-btn>
+          <v-btn
+            v-for="(x, i) in config.codes"
+            :key="`${i}-${x}`"
+            text
+            @click="send_rf(x.code)"
+            primary
+          >{{x.name}}</v-btn>
         </v-row>
       </v-card-actions>
     </v-card>
@@ -57,7 +76,7 @@ export default {
   components: {},
   created() {},
   data: () => ({
-    Backend_Url: "http://192.168.0.97/",
+    Backend_Url: "http://localhost:8000/",
     config: {},
     connected: false,
     client: undefined,
@@ -66,7 +85,14 @@ export default {
     snacc_text: "",
     Alert: false,
     Alerttext: "",
+    response: "",
+    response_color: "error",
+    loading: false,
+    dialog: false,
     retry: false,
+    title: "",
+    message: "",
+    img: ""
   }),
   async mounted() {
     this.Get();
@@ -107,7 +133,7 @@ export default {
         return false;
       }
     },
-    send(code) {
+    send_rf(code) {
       let data = { action: "rf", value: code };
       axios
         .post(this.Backend_Url, data)
@@ -124,6 +150,34 @@ export default {
         .catch(error => {
           this.snacc_text = "Unable to set light status: " + error;
           this.snacc = true;
+        });
+    },
+    send_notif() {
+      let data = {
+        action: "notif",
+        value: {
+          title: this.title,
+          message: this.message,
+          imgurl: this.img
+        }
+      };
+      console.log(data);
+      let self = this;
+      this.loading = true;
+      let url = this.Backend_Url;
+      axios
+        .post(url, data)
+        .then(function(response) {
+          self.response = response.data.value;
+          self.response_color = response.data.Success ? "success" : "error";
+
+          self.loading = false;
+        })
+        .catch(function(error) {
+          // handle error
+          self.response = error + "  ==  Is the server running?";
+          self.response_color = "error";
+          self.loading = false;
         });
     },
     connect() {
