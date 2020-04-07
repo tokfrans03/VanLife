@@ -1,6 +1,5 @@
 <template>
-  <div class="about">
-    <v-card>
+    <v-card class="ma-4"> 
       <v-card-title primary-title>
         <v-icon>lightbulb-on</v-icon>
         <div>
@@ -21,7 +20,6 @@
         </v-row>
       </v-card-actions>
     </v-card>
-  </div>
 </template>
 
 <script>

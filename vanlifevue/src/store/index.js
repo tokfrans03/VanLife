@@ -12,7 +12,10 @@ const store = new Vuex.Store({
     config: {},
     retry: false,
     personer: [],
-    Get_loading: false
+    Get_loading: false,
+    stad: "Västerås",
+    weather:{
+    }
   },
   mutations: {
     Get: (state, verbose) => {

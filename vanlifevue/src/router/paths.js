@@ -1,7 +1,7 @@
 export default [{
     path: '/',
     name: 'Dashboard',
-    view: 'Home',
+    view: 'Dashboard',
     //   component: Home
   },
   {
@@ -13,5 +13,11 @@ export default [{
     path: '/Notif',
     name: 'Notifikationer',
     view: 'Notif',
+  },
+  {
+    path: '/Settings',
+    name: 'Settings',
+    view: 'Settings',
   }
+
 ];

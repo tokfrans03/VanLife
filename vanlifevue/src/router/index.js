@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Home from '../views/Home.vue'
 import paths from "./paths";
 
 function route(path, view, name, ) {

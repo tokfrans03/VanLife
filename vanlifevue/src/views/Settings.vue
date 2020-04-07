@@ -11,6 +11,7 @@
           <v-col cols="auto">
             <v-btn class="ma-2" color="yellow" @click="refreshconfig()">Refresh Backend</v-btn>
             <v-btn class="ma-2" color="primary" @click="cons()">Console</v-btn>
+            <v-btn class="mx-2" color="success">Check for upadte</v-btn>
           </v-col>
           <v-col cols="auto">
             <v-btn
@@ -34,7 +35,7 @@ import { mapGetters, mapMutations } from "vuex";
 var mqtt = require("mqtt");
 
 export default {
-  name: "home",
+  name: "Dashboard",
   components: {},
   data: () => ({
     config: {},
