@@ -11,7 +11,6 @@
           <v-col cols="auto">
             <v-btn class="ma-2" color="yellow" @click="refreshconfig()">Refresh Backend</v-btn>
             <v-btn class="ma-2" color="primary" @click="cons()">Console</v-btn>
-            <v-btn class="mx-2" color="success">Check for upadte</v-btn>
           </v-col>
           <v-col cols="auto">
             <v-btn
@@ -23,6 +22,27 @@
             <v-btn class="ma-2" color="success" :disabled="!check()" @click="sub()">subscribe</v-btn>
           </v-col>
         </v-row>
+      </v-card-actions>
+    </v-card>
+    <v-card class="my-2">
+      <v-card-title primary-title>Location</v-card-title>
+      <v-form class="pa-4">
+        <v-text-field label="Lat-long" v-model="$store.state.geo"></v-text-field>
+        <v-text-field
+          label="Stad"
+          v-model="$store.state.stad"
+        ></v-text-field>
+      </v-form>
+    </v-card>
+
+    <v-card>
+      <v-card-title primary-title>Update files</v-card-title>
+      <v-card-actions class="ma-4">
+        <v-btn
+          color="success"
+          @click="$store.state.snac = true; $store.state.snac_text = 'Finns inte än :('"
+        >Check for update</v-btn>
+        <v-btn color="error" v-if="updateavailable">update</v-btn>
       </v-card-actions>
     </v-card>
   </div>
@@ -41,7 +61,9 @@ export default {
     config: {},
     connected: false,
     client: undefined,
-    load: false
+    load: false,
+    updateavailable: false,
+    latlong: ""
   }),
   computed: {
     ...mapGetters(["BackendUrl", "retry"])

@@ -14,6 +14,7 @@ const store = new Vuex.Store({
     personer: [],
     Get_loading: false,
     stad: "Västerås",
+    geo: "33.74,-84.39",
     weather:{
     }
   },
@@ -43,6 +44,22 @@ const store = new Vuex.Store({
           }
           state.retry = true;
           state.Get_loading = false
+        });
+    },
+    Get_weather: (state) => {
+      let url =
+        "https://api.weather.com/v3/wx/observations/current?geocode=" +
+        state.geo +
+        "&units=m&language=sv&format=json&apiKey=" +
+        state.config.weather.key;
+      axios
+        .get(url)
+        .catch(error => {
+          state.snac_text = "Unable to get weather";
+          state.snac = true;
+        })
+        .then(response => {
+          state.weather = response.data;
         });
     },
   },
