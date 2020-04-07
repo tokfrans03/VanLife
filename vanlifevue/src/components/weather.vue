@@ -30,7 +30,7 @@
     <v-divider></v-divider>
 
     <v-card-actions href="https://www.smhi.se/">
-      <v-btn text>
+      <v-btn text class="display-1">
         SMHI
         <v-icon>mdi-open-in-new</v-icon>
       </v-btn>
