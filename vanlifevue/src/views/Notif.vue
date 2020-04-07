@@ -9,8 +9,13 @@
       </v-form>
       <v-card-actions>
         <v-btn color="success" :loading="loading1" :disabled="!add_form" @click="add">lägg till</v-btn>
-        <v-select class="px-2" :items="personer" label="Personer" v-model="person" ></v-select>
-        <v-btn color="error" :loading="loading2" :disabled="!Boolean(person)" @click="remove()">ta bort</v-btn>
+        <v-select class="px-2" :items="$store.state.personer" label="Personer" v-model="person"></v-select>
+        <v-btn
+          color="error"
+          :loading="loading2"
+          :disabled="!Boolean(person)"
+          @click="remove()"
+        >ta bort</v-btn>
         <!-- <v-btn color="error">ta bort</v-btn> -->
       </v-card-actions>
     </v-card>
@@ -30,7 +35,7 @@
 
 <script>
 import axios from "axios";
-import { mapGetters } from "vuex";
+import { mapGetters, mapMutations } from "vuex";
 
 export default {
   name: "Notif",
@@ -50,19 +55,16 @@ export default {
       key: "",
       name: "",
       required_rule: [v => !!v || "Required"],
-      personer: [],
       person: ""
     };
   },
   computed: {
     ...mapGetters(["BackendUrl", "config"])
   },
-  mounted() {
-    this.$store.state.config.notif.forEach(person => {
-      this.personer.push(person.name);
-    });
-  },
   methods: {
+    ...mapMutations({
+      Get: "Get" // map `this.add()` to `this.$store.commit('increment')`
+    }),
     add() {
       let data = {
         action: "addnotif",
@@ -84,6 +86,7 @@ export default {
             ? "success"
             : "error";
           self.loading1 = false;
+          self.Get(false)
         })
         .catch(function(error) {
           // handle error
@@ -91,9 +94,10 @@ export default {
           self.$store.state.snac_text = error + "  ==  Is the server running?";
           self.$store.state.snac_color = "error";
           self.loading1 = false;
+          self.Get(false)
         });
     },
-    remove(){
+    remove() {
       let data = {
         action: "removenotif",
         value: {
@@ -112,6 +116,7 @@ export default {
             ? "success"
             : "error";
           self.loading2 = false;
+          self.Get()
         })
         .catch(function(error) {
           // handle error
@@ -119,6 +124,7 @@ export default {
           self.$store.state.snac_text = error + "  ==  Is the server running?";
           self.$store.state.snac_color = "error";
           self.loading2 = false;
+          self.Get()
         });
     },
     send_notif() {

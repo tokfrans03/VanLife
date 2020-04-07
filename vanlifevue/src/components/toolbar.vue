@@ -6,6 +6,12 @@
       <v-spacer></v-spacer>
 
       <v-toolbar-items>
+        <v-btn
+          :loading="loading5"
+          @click="Get(true)"
+        >
+          <v-icon dark>mdi-refresh</v-icon>
+        </v-btn>
         <v-btn v-for="(link, i) in links" :key="i" :to="link.path">{{link.name}}</v-btn>
       </v-toolbar-items>
     </v-toolbar>
@@ -14,13 +20,20 @@
 
 <script>
 import paths from "@/router/paths";
+import { mapGetters, mapMutations } from "vuex";
 
 export default {
   data: () => ({}),
   computed: {
     links() {
       return paths;
-    }
+    },
+    ...mapGetters(["Get_loading"])
+  },
+  methods: {
+    ...mapMutations({
+      Get: "Get" // map `this.add()` to `this.$store.commit('increment')`
+    })
   }
 };
 </script>

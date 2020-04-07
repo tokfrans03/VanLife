@@ -30,7 +30,7 @@
 <script>
 // @ is an alias to /src
 import axios from "axios";
-import { mapGetters } from "vuex";
+import { mapGetters, mapMutations } from "vuex";
 var mqtt = require("mqtt");
 
 export default {
@@ -40,33 +40,15 @@ export default {
     config: {},
     connected: false,
     client: undefined,
-    load: false,
+    load: false
   }),
-  async mounted() {
-    this.Get();
-  },
   computed: {
     ...mapGetters(["BackendUrl", "retry"])
   },
   methods: {
-    Get() {
-      axios
-        .get(this.$store.state.BackendUrl)
-        .then(response => {
-          // console.log(response);
-          this.$store.state.config = response.data.value.config;
-          this.config = response.data.value.config;
-          this.$store.state.snac_text = "Loaded config";
-          this.$store.state.snac = true;
-          this.$store.state.retry = false;
-        })
-        .catch(error => {
-          // console.log(error);
-          this.$store.state.snac_text = "Unable to get config";
-          this.$store.state.snac = true;
-          this.$store.state.retry = true;
-        });
-    },
+    ...mapMutations({
+      Get: "Get" // map `this.add()` to `this.$store.commit('increment')`
+    }),
     refreshconfig() {
       axios
         .get(this.$store.state.BackendUrl + "refresh")
@@ -85,7 +67,7 @@ export default {
         return false;
       }
     },
-    
+
     connect() {
       var mqtt_url = this.$store.state.config.mqtt.url;
       var url = "mqtt://" + mqtt_url;
@@ -130,7 +112,10 @@ export default {
     cons() {
       console.log(this.load);
       if (this.check()) {
-        this.client.publish(this.$store.state.config.mqtt.topics[0], "HHHHHHeeelooooo");
+        this.client.publish(
+          this.$store.state.config.mqtt.topics[0],
+          "HHHHHHeeelooooo"
+        );
       }
     }
   }

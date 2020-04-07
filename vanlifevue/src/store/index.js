@@ -11,29 +11,40 @@ const store = new Vuex.Store({
     snac_text: "",
     config: {},
     retry: false,
+    personer: [],
+    Get_loading: false
   },
   mutations: {
-    Get: (state) => {
+    Get: (state, verbose) => {
+      state.Get_loading = true
       axios
         .get(state.BackendUrl)
         .then(response => {
           // console.log(response);
           state.config = response.data.value.config;
-          state.snac_text = "Loaded config";
-          state.snac = true;
+          if (verbose) {
+            state.snac_text = "Loaded config";
+            state.snac = true;
+          }
           state.retry = false;
+          state.personer = []
+          state.config.notif.forEach(person => {
+            state.personer.push(person.name);
+          });
+          state.Get_loading = false
         })
         .catch(error => {
-          state.snac_text = "Unable to get config";
-          state.snac = true;
+          if (verbose) {
+            state.snac_text = "Unable to get config";
+            state.snac = true;
+          }
           state.retry = true;
+          state.Get_loading = false
         });
     },
   },
-  actions: {
-  },
-  modules: {
-  }
+  actions: {},
+  modules: {}
 })
 
 export default store
