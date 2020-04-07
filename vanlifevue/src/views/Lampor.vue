@@ -41,12 +41,10 @@ export default {
         .then(response => {
           // console.log(response);
 
-          if (response.data.Success) {
-            this.$store.state.snac_text = "Success";
-          } else {
-            this.$store.state.snac_text =
-              "Something went wrong: " + response.data.value;
-          }
+          this.$store.state.snac_text = response.data.Success
+            ? "Success"
+            : "Something went wrong: " + response.data.value;
+
           this.$store.state.snac = true;
         })
         .catch(error => {

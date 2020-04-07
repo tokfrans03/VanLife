@@ -1,8 +1,17 @@
 <template>
   <div>
     <v-card width="500" class="ma-4">
+      <v-form v-model="send" class="pa-4">
+        <v-text-field name="title" label="Titel" v-model="title" :rules="required_rule"></v-text-field>
+        <v-text-field name="message" label="Medelande" v-model="message" :rules="required_rule"></v-text-field>
+        <v-text-field name="img" label="Bild URL" v-model="img"></v-text-field>
+        <v-btn color="success" :loading="loading" :disabled="!send" @click="send_notif()">send</v-btn>
+      </v-form>
+      <v-alert :color="response_color" :value="Boolean(response)">{{response}}</v-alert>
+    </v-card>
+    <v-card width="500" class="ma-4">
       <v-card-title primary-title>Lägg till personer</v-card-title>
-      <v-form class="px-4" v-model="add_form">
+      <v-form class="px-4" v-model="add_form" ref="form">
         <v-text-field label="Namn" :rules="required_rule" v-model="name"></v-text-field>
         <v-text-field label="User" :rules="required_rule" v-model="user"></v-text-field>
         <v-text-field label="Key" :rules="required_rule" v-model="key"></v-text-field>
@@ -20,16 +29,6 @@
       </v-card-actions>
     </v-card>
 
-    <v-card width="500" class="ma-4">
-      <v-form v-model="send" class="pa-4">
-        <v-text-field name="url" label="url" v-model="$store.state.BackendUrl"></v-text-field>
-        <v-text-field name="title" label="Titel" v-model="title" :rules="required_rule"></v-text-field>
-        <v-text-field name="message" label="Medelande" v-model="message" :rules="required_rule"></v-text-field>
-        <v-text-field name="img" label="Bild URL" v-model="img"></v-text-field>
-        <v-btn color="success" :loading="loading" :disabled="!send" @click="send_notif()">send</v-btn>
-      </v-form>
-      <v-alert :color="response_color" :value="Boolean(response)">{{response}}</v-alert>
-    </v-card>
   </div>
 </template>
 
@@ -74,6 +73,10 @@ export default {
           name: this.name
         }
       };
+      this.user = ""
+      this.key = ""
+      this.name = ""
+      this.$refs.form.reset()
       let self = this;
       this.loading1 = true;
       let url = this.$store.state.BackendUrl;

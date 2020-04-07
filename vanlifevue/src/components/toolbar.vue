@@ -7,7 +7,7 @@
 
       <v-toolbar-items>
         <v-btn
-          :loading="loading5"
+          :loading="$store.state.Get_loading"
           @click="Get(true)"
         >
           <v-icon dark>mdi-refresh</v-icon>
@@ -24,15 +24,18 @@ import { mapGetters, mapMutations } from "vuex";
 
 export default {
   data: () => ({}),
+  mounted() {
+    this.Get()
+  },
   computed: {
     links() {
       return paths;
     },
-    ...mapGetters(["Get_loading"])
+    ...mapGetters(["Get_loading"]),
   },
   methods: {
     ...mapMutations({
-      Get: "Get" // map `this.add()` to `this.$store.commit('increment')`
+      Get: "Get" // map `this.Get()` to `this.$store.commit('Get')`
     })
   }
 };
