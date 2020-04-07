@@ -6,24 +6,30 @@ import requests
 port = 8000
 config = {}
 manifest = []
-Allowed_actions = ["rf", "get", "notif"]
+Allowed_actions = ["rf", "get", "notif", "addnotif", "removenotif"]
+
 
 def sendnotif(title, message, image=""):
-    
+
     urls = []
     names = []
+    errors = []
 
     for x in config["notif"]:
         names.append(x["name"])
-        urls.append("https://api.pushmealert.com?user="+x["user"]+"&key="+x["key"]+"&title="+title+"&message="+message)
-    
-    for url in urls:
+        urls.append("https://api.pushmealert.com?user=" +
+                    x["user"]+"&key="+x["key"]+"&title="+title+"&message="+message)
+
+    for url, n in zip(urls, range(len(urls))):
         res = json.loads(requests.get(url).text)
         if res["status"] != 1:
-            return [False]
+            errors.append(names[n])
     names = ", ".join(names)
+    errors = ", ".join(errors)
+    if len(errors) != 0:
+        return [False, "Sent to " + names + ". but failed to send to " + errors + " (try reentering their user and key)"]
     return [True, "Sent to " + names]
-    
+
     # if image == "":
     # else:
     #     url = "https://api.pushmealert.com?user="+user+"&key="+key+"&title="+title+"&message="+message+"&image=" + image
@@ -40,6 +46,7 @@ def refreshConfig():
 
 
 refreshConfig()
+
 
 def checkbody(body):
     try:
@@ -60,17 +67,33 @@ def checkbody(body):
         if body["action"] not in Allowed_actions:
             return [False, "Action '" + body["action"] + "' not allowed"]
 
-        if body["action"] == "rf": # checks for rf values
+        if body["action"] == "rf":  # checks for rf values
             if type(body["value"]) != int:
                 return [False, "rf value must be an int"]
-        
-        if body["action"] == "notif": # checks for notif 
+
+        if body["action"] == "notif":  # checks for notif
             if type(body["value"]) != dict:
                 return [False, "Value must be a dict contaning a title and message"]
             if "title" not in body["value"]:
                 return [False, "Value must contain a title"]
             if "message" not in body["value"]:
                 return [False, "Value must contain a message"]
+
+        if body["action"] == "addnotif":  # checks for addnotif
+            if type(body["value"]) != dict:
+                return [False, "Value must be a dict contaning a title and message"]
+            if "user" not in body["value"]:
+                return [False, "Value must contain a user"]
+            if "key" not in body["value"]:
+                return [False, "Value must contain a key"]
+            if "name" not in body["value"]:
+                return [False, "Value must contain a name"]
+
+        if body["action"] == "removenotif":  # checks for removenotif
+            if type(body["value"]) != dict:
+                return [False, "Value must be a dict contaning a title and message"]
+            if "name" not in body["value"]:
+                return [False, "Value must contain a name"]
 
         return [True]
     except:
@@ -79,7 +102,7 @@ def checkbody(body):
 
 class S(BaseHTTPRequestHandler):
     def send_res(self, args, code=200, Success=True):
-        
+
         self.send_response(code)
         self.send_header('Content-type', 'application/json')
         self.send_header('Access-Control-Allow-Origin', '*')
@@ -153,18 +176,58 @@ class S(BaseHTTPRequestHandler):
                     try:
                         body = body["value"]
                         if "imgurl" in body:
-                            res = sendnotif(body["title"], body["message"], image=body["imgurl"])
+                            res = sendnotif(
+                                body["title"], body["message"], image=body["imgurl"])
                         else:
                             res = sendnotif(body["title"], body["message"])
                         if res[0]:
-                            self.send_res(res[1]) # success
-                        else: # error
-                            self.send_res(res[1], Success=False, code=201) 
+                            self.send_res(res[1])  # success
+                        else:  # error
+                            self.send_res(res[1], Success=False, code=201)
                         return
-
+                    except IndexError:
+                        self.send_res(
+                            "Index out of range, try sending a message", code=500, Success=False)
+                        return
                     except Exception as e:
                         print(e)
-                        self.send_res("Something went wrong", code=500, Success=False)
+                        self.send_res("Something went wrong: " +
+                                      e, code=500, Success=False)
+                        return
+                elif body["action"] == "addnotif":
+                    try:
+                        body = body["value"]
+                        config["notif"].append(body)
+                        with open("config.json", "w+", encoding='utf-8') as json_file:
+                            json.dump(config, json_file)
+                        refreshConfig()
+                        self.send_res("Lade till " + body["name"])
+                        return
+                    except Exception as e:
+                        print(e)
+                        self.send_res("Something went wrong: " +
+                                      e, code=500, Success=False)
+                        return
+                elif body["action"] == "removenotif":
+                    try:
+                        body = body["value"]
+                        removed = False
+                        for x, n in zip(config["notif"], range(len(config["notif"]))):
+                            if x["name"] == body["name"]:
+                                config["notif"].pop(n)
+                                removed = True
+                        with open("config.json", "w+", encoding='utf-8') as json_file:
+                            json.dump(config, json_file)
+                        refreshConfig()
+                        if removed:
+                            self.send_res("Tog bort till " + body["name"])
+                        else:
+                            self.send_res("Hittade inte '" + body["name"]+ "'", Success=False)
+                        return
+                    except Exception as e:
+                        print(e)
+                        self.send_res("Something went wrong: " +
+                                      e, code=500, Success=False)
                         return
 
             else:  # Body is wrong

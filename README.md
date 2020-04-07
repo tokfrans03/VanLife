@@ -17,13 +17,31 @@ för att refresha configen:
 
 ## POST
 
-skicka en notifikation:
+### skicka en notifikation:
 
     {
     	"action": "notif",
     	"value": {
     		"title": "Hej",
     		"message": "HALLå"
+    	}
+    }
+
+tillbaka:
+
+	{
+		"Success": True,
+		"value": "Sent to Martin"
+	}
+
+### Lägg till en person i notifikationslistan
+
+	{
+    	"action": "addnotif",
+    	"value": {
+    		"user": "13155",
+    		"key": "wdadawdawd",
+			"name": "Martin"
     	}
     }
 
