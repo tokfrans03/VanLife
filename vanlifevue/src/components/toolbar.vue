@@ -8,7 +8,7 @@
       <v-toolbar-items>
         <v-btn
           :loading="$store.state.Get_loading"
-          @click="Get(true); Get_weather()"
+          @click="Get(true); Get_weather(); Get_geo()"
         >
           <v-icon dark>mdi-refresh</v-icon>
         </v-btn>
@@ -26,7 +26,9 @@ export default {
   data: () => ({}),
   mounted() {
     this.Get()
-    this.Get_weather()
+    setInterval(() => {
+      this.Get()
+    }, 60 * 1000);
   },
   computed: {
     links() {
@@ -37,7 +39,8 @@ export default {
   methods: {
     ...mapMutations({
       Get: "Get", // map `this.Get()` to `this.$store.commit('Get')`
-      Get_weather: "Get_weather"
+      Get_weather: "Get_weather",
+      Get_geo: "Get_geo"
     })
   }
 };

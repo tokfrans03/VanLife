@@ -28,10 +28,8 @@
       <v-card-title primary-title>Location</v-card-title>
       <v-form class="pa-4">
         <v-text-field label="Lat-long" v-model="$store.state.geo"></v-text-field>
-        <v-text-field
-          label="Stad"
-          v-model="$store.state.stad"
-        ></v-text-field>
+        <v-text-field label="Stad" v-model="$store.state.stad"></v-text-field>
+        <v-btn color="success" @click="Get_geo()">Get current</v-btn>
       </v-form>
     </v-card>
 
@@ -54,6 +52,7 @@ import axios from "axios";
 import { mapGetters, mapMutations } from "vuex";
 var mqtt = require("mqtt");
 
+
 export default {
   name: "Dashboard",
   components: {},
@@ -70,7 +69,8 @@ export default {
   },
   methods: {
     ...mapMutations({
-      Get: "Get" // map `this.add()` to `this.$store.commit('increment')`
+      Get: "Get", // map `this.add()` to `this.$store.commit('increment')`
+      Get_geo: "Get_geo"
     }),
     refreshconfig() {
       axios
@@ -90,7 +90,6 @@ export default {
         return false;
       }
     },
-
     connect() {
       var mqtt_url = this.$store.state.config.mqtt.url;
       var url = "mqtt://" + mqtt_url;

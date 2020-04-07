@@ -29,8 +29,8 @@
 
     <v-divider></v-divider>
 
-    <v-card-actions href="https://www.smhi.se/">
-      <v-btn text class="display-1">
+    <v-card-actions >
+      <v-btn text :href="`https://www.smhi.se/q/${$store.state.stad}`" class="display-1">
         SMHI
         <v-icon>mdi-open-in-new</v-icon>
       </v-btn>
@@ -40,31 +40,19 @@
 
 <script>
 import axios from "axios";
+import { mapMutations } from "vuex";
+
 export default {
   data() {
     return {};
   },
-  mounted() {
-    this.Get_weather();
+  created() {
+
   },
   methods: {
-    Get_weather() {
-      let url =
-        "https://api.weather.com/v3/wx/observations/current?geocode=" +
-        "33.74,-84.39" +
-        "&units=m&language=sv&format=json&apiKey=" +
-        this.$store.state.config.weather.key;
-      axios
-        .get(url)
-        .catch(error => {
-          this.$store.state.snac_text = "Unable to get weather";
-          this.$store.state.snac = true;
-        })
-        .then(response => {
-          console.log(response.data);
-          this.$store.state.weather = response.data;
-        });
-    },
+    ...mapMutations({
+      Get_weather: "Get_weather" // map `this.add()` to `this.$store.commit('increment')`
+    }),
     winddir() {
       return (
         "transform: rotate(" +
