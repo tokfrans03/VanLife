@@ -6,7 +6,7 @@ import requests
 port = 8000
 config = {}
 manifest = []
-Allowed_actions = ["rf", "get", "notif", "addnotif", "removenotif"]
+Allowed_actions = ["rf", "get", "notif", "addnotif", "removenotif", "update"]
 
 
 def sendnotif(title, message, image=""):
@@ -34,6 +34,10 @@ def sendnotif(title, message, image=""):
     # else:
     #     url = "https://api.pushmealert.com?user="+user+"&key="+key+"&title="+title+"&message="+message+"&image=" + image
 
+def update(url):
+    import os
+    os.system("sh update.sh " + url)
+    exit()
 
 def refreshConfig():
     global config
@@ -124,7 +128,7 @@ class S(BaseHTTPRequestHandler):
 
     def do_GET(self):
 
-        print("\nPath:", self.path)
+        print("\nGET Path:", self.path)
         print(self.headers)
 
         if self.path == "/":
@@ -161,7 +165,7 @@ class S(BaseHTTPRequestHandler):
         # <--- Gets the data itself
         post_data = self.rfile.read(content_length)
         # print(json.loads(post_data.decode('utf-8')))
-        print("\nPath:", str(self.path),
+        print("\nPOST Path:", str(self.path),
               "\nHeaders:\n" + str(self.headers))
         print(content_length)
         if content_length > 0:
@@ -223,6 +227,18 @@ class S(BaseHTTPRequestHandler):
                             self.send_res("Tog bort till " + body["name"])
                         else:
                             self.send_res("Hittade inte '" + body["name"]+ "'", Success=False)
+                        return
+                    except Exception as e:
+                        print(e)
+                        self.send_res("Something went wrong: " +
+                                      e, code=500, Success=False)
+                        return
+                
+                elif body["action"] == "update":
+                    try:
+                        url = body["value"]
+                        self.send_res("Upgraderar..." + url)
+                        update(url)
                         return
                     except Exception as e:
                         print(e)

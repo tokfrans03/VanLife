@@ -8,7 +8,7 @@
       <v-toolbar-items>
         <v-btn
           :loading="$store.state.Get_loading"
-          @click="Get(true); Get_weather(); Get_geo()"
+          @click="Get(true);"
         >
           <v-icon dark>mdi-refresh</v-icon>
         </v-btn>
@@ -25,9 +25,9 @@ import { mapGetters, mapMutations } from "vuex";
 export default {
   data: () => ({}),
   mounted() {
-    this.Get()
+    this.Get(true)
     setInterval(() => {
-      this.Get()
+      this.Get(false, true)
     }, 60 * 1000);
   },
   computed: {

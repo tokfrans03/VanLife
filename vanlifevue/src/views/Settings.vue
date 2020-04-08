@@ -6,7 +6,7 @@
       <v-card-actions>
         <v-row align="start" justify="space-between">
           <v-col v-if="$store.state.retry" cols="auto">
-            <v-btn @click="Get()" color="error">Retry</v-btn>
+            <v-btn @click="Get(true)" :loading="$store.state.Get_loading" color="error">Retry</v-btn>
           </v-col>
           <v-col cols="auto">
             <v-btn class="ma-2" color="yellow" @click="refreshconfig()">Refresh Backend</v-btn>
@@ -34,13 +34,58 @@
     </v-card>
 
     <v-card>
-      <v-card-title primary-title>Update files</v-card-title>
-      <v-card-actions class="ma-4">
-        <v-btn
-          color="success"
-          @click="$store.state.snac = true; $store.state.snac_text = 'Finns inte än :('"
-        >Check for update</v-btn>
-        <v-btn color="error" v-if="updateavailable">update</v-btn>
+      <v-row>
+        <v-col>
+          <v-card-title primary-title>Update files</v-card-title>
+          <v-btn
+            class="ml-4"
+            color="success"
+            :loading="$store.state.load"
+            @click="check_update(); $store.state.load= true"
+          >Check for update</v-btn>
+          <v-switch class="ml-4" label="Advancerat" v-model="advanced"></v-switch>
+        </v-col>
+        <v-col cols="auto">
+          <span class="mr-4">version {{$store.state.ver}}</span>
+        </v-col>
+      </v-row>
+      <v-card v-if="advanced" class="ma-4 lighten-2">
+        <v-card-title primary-title>
+          Egen upgradeings url
+        </v-card-title>
+        <v-form class="pa-4">
+          <v-text-field
+            label="Url till zip"
+            v-model="url"
+          ></v-text-field>
+          <v-btn color="error" @click="update(url)">UpgraderaEgen upgradeings url</v-btn>
+        </v-form>
+      </v-card>
+      <v-card-actions v-if="$store.state.updateavailable" class="ma-4">
+        <v-card>
+          <v-card-title primary-title>
+            <div>
+              <h3 class="headline mb-0">{{$store.state.updateinfo.name}}</h3>
+              <div>Säppt {{$store.state.time}}</div>
+            </div>
+          </v-card-title>
+          <div class="ma-4">{{$store.state.updateinfo.body}}</div>
+          <v-divider></v-divider>
+          <v-card-actions>
+            <v-row>
+              <v-col cols="auto">
+                <v-btn
+                  color="error"
+                  :loading="load1"
+                  @click="update($store.state.updateurl); load1 = true"
+                >update to {{$store.state.updateinfo.tag_name}}</v-btn>
+              </v-col>
+              <v-col>
+                <v-alert type="warning" v-model="updating">Sida upgraderas, den kommer tillbaka om ca 1 min</v-alert>
+              </v-col>
+            </v-row>
+          </v-card-actions>
+        </v-card>
       </v-card-actions>
     </v-card>
   </div>
@@ -49,9 +94,9 @@
 <script>
 // @ is an alias to /src
 import axios from "axios";
+import moment from "moment";
 import { mapGetters, mapMutations } from "vuex";
 var mqtt = require("mqtt");
-
 
 export default {
   name: "Dashboard",
@@ -60,9 +105,10 @@ export default {
     config: {},
     connected: false,
     client: undefined,
-    load: false,
-    updateavailable: false,
-    latlong: ""
+    load1: false,
+    updating: false,
+    advanced: false,
+    url: ""
   }),
   computed: {
     ...mapGetters(["BackendUrl", "retry"])
@@ -70,8 +116,32 @@ export default {
   methods: {
     ...mapMutations({
       Get: "Get", // map `this.add()` to `this.$store.commit('increment')`
-      Get_geo: "Get_geo"
+      Get_geo: "Get_geo",
+      check_update: "check_update"
     }),
+    update(url) {
+      let data = {
+        action: "update",
+        value: url
+      };
+      axios
+        .post(this.$store.state.BackendUrl, data)
+        .catch(error => {
+          this.$store.state.snac_text = error;
+          this.$store.state.snac = true;
+          this.load1 = false;
+        })
+        .then(response => {
+          // console.log(response)
+          this.load1 = false;
+          this.updating = true;
+          this.$store.state.snac = true;
+          this.$store.state.snac_text = response.data.value;
+          this.$store.state.snac_color = response.data.Success
+            ? "success"
+            : "error";
+        });
+    },
     refreshconfig() {
       axios
         .get(this.$store.state.BackendUrl + "refresh")
@@ -132,7 +202,6 @@ export default {
       this.$store.state.snac = true;
     },
     cons() {
-      console.log(this.load);
       if (this.check()) {
         this.client.publish(
           this.$store.state.config.mqtt.topics[0],

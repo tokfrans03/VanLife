@@ -1,10 +1,69 @@
 {
     "mqtt": {
-        "url": "https://www.maqiatto.com/",
-        "port": 1883,
+        "url": "maqiatto.com",
+        "port": 8883,
         "user": "",
         "pass": "",
-        "topics": [""]
+        "topics": [
+            ""
+        ]
     },
-    "frukter": ["äpplen", "päron"]
+    "creds": {
+        "weather": "",
+        "geo": "",
+        "github_repo_token": ""
+    },
+    "codes": [
+        {
+            "name": "Av/P\u00e5",
+            "code": 4353281
+        },
+        {
+            "name": "Light",
+            "code": 4353284
+        },
+        {
+            "name": "Bright +",
+            "code": 4353285
+        },
+        {
+            "name": "Bright -",
+            "code": 4353286
+        },
+        {
+            "name": "100%",
+            "code": 4353287
+        },
+        {
+            "name": "50%",
+            "code": 4353288
+        },
+        {
+            "name": "25%",
+            "code": 4353289
+        },
+        {
+            "name": "Mode +",
+            "code": 4353291
+        },
+        {
+            "name": "Mode -",
+            "code": 4353297
+        },
+        {
+            "name": "Speed +",
+            "code": 4353295
+        },
+        {
+            "name": "Speed -",
+            "code": 4353293
+        }
+    ],
+    "notif": [
+        {
+            "name": "",
+            "user": "",
+            "key": ""
+        }
+    ]
 }

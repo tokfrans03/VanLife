@@ -11,7 +11,7 @@
 
     <v-row align="start" justify="space-around">
       <v-col cols="10">
-        <span class="display-3 mx-4">{{$store.state.weather.windSpeed}} m/s</span>
+        <span class="display-3 mx-4">{{Math.round(($store.state.weather.windSpeed / 3.6 ) * 10 )/10 }} m/s</span>
         <span class="display-2 mx-4">{{$store.state.weather.windDirectionCardinal}}</span>
       </v-col>
       <v-col>
