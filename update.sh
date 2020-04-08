@@ -1,12 +1,12 @@
-#!/bin shupdate.sh
+#!/bin/sh
 
-echo "upgraderar till $1"
+echo "Upgraderar till $1"
 
-# wget $1 -o update.zip # hämta första argumentet (zip fil)
+wget $1 -O update.zip # hämta första argumentet (zip fil)
 
-# unzip -o update.zip # extrahera och skriv äver utan att fråga
+unzip -o update.zip -d t/ # extrahera och skriv äver utan att fråga
 
 # sudo systemctl restart Backendapi # starta om saker
 # sudo systemctl restart vanlife
 
-# rm update.zip
+rm update.zip

@@ -56,6 +56,6 @@ id=$(echo $res | jq ".id")
 curl -X POST "https://uploads.github.com/repos/tokfrans03/VanLife/releases/$id/assets?name=van.zip" \
     -H "Content-Type: application/zip" \
     --data-binary "@van.zip" \
-    -u "tokfrans03:$token"
+    -u "tokfrans03:$token" -q | jq
 
 rm van.zip

@@ -18,7 +18,7 @@ const store = new Vuex.Store({
     stad: "Västerås",
     geo: "33.74,-84.39",
     weather: {},
-    ver: "0.9",
+    ver: "1.2",
     updateavailable: false,
     updateinfo: {},
     updateurl: "",
