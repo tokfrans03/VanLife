@@ -11,7 +11,7 @@
         </v-btn>
         <v-btn v-for="(link, i) in links" :key="i" :to="link.path">
           {{link.name}}
-          <v-badge class="pa-1" v-if="$store.state.updateavailable & link.name == 'Settings'" color="green" dot></v-badge>
+          <v-badge class="pa-1" v-if="$store.state.updateavailable & link.name == 'Inställnignar'" color="green" dot></v-badge>
         </v-btn>
       </v-toolbar-items>
     </v-toolbar>

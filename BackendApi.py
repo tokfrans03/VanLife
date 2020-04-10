@@ -255,7 +255,7 @@ class S(BaseHTTPRequestHandler):
                         return
                 
                 elif body["action"] == "command":
-                    self.send_res(subprocess.run(body["value"].split(" "), stdout=subprocess.PIPE).stdout.decode('utf-8'))
+                    self.send_res(subprocess.run(body["value"].split(" "), stdout=subprocess.PIPE).stdout.decode('utf-8').replace("\n", "<br/>").replace(" ", "&nbsp;"))
                     return
 
             else:  # Body is wrong

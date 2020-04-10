@@ -19,7 +19,7 @@ const store = new Vuex.Store({
     stad: "Västerås",
     geo: "33.74,-84.39",
     weather: {},
-    ver: "1.3.3",
+    ver: "1.3.7",
     updateavailable: false,
     updateinfo: {},
     updateurl: "",
@@ -30,27 +30,27 @@ const store = new Vuex.Store({
     Get: (state, verbose, errors) => {
       state.Get_loading = true
       // console.log("GETTOINGG")
-      store.commit('check_update')
       axios
         .get(state.BackendUrl)
         .then(response => {
           // console.log(response);
           state.config = response.data.value.config;
           if (verbose) {
-            state.snac_text = "Config laddad";
+            state.snac_text = "Konfig laddad";
             state.snac = true;
           }
           state.retry = false;
           state.personer = []
           state.config.notif.forEach(person => {
             state.personer.push(person.name);
-          });
+          }); 
           store.commit('Get_geo')
+          store.commit('check_update', errors)
 
         })
         .catch(error => {
           if (verbose | errors) {
-            state.snac_text = "Unable to get config, is the server running?";
+            state.snac_text = error + " Är Pi:en på?";
             state.snac_color = "error";
             state.snac = true;
           }
@@ -67,7 +67,7 @@ const store = new Vuex.Store({
       axios
         .get(url)
         .catch(error => {
-          state.snac_text = "Unable to get weather";
+          state.snac_text = error;
           state.snac = true;
           state.Get_loading = false;
         })
@@ -86,7 +86,8 @@ const store = new Vuex.Store({
           axios
             .get(url)
             .catch(error => {
-              state.snac_text = "Unable to reach network";
+              state.snac_text = error;
+              state.snac_color = "error"
               state.snac = true;
               state.Get_loading = false;
             })
@@ -95,18 +96,22 @@ const store = new Vuex.Store({
               store.commit('Get_weather')
             });
         } else {
-          console.log('Position unknown:', err.message);
+          state.snac_text = 'Position okänd:', err.message;
+          state.snac_color = "error"
+          state.snac = true;
+          state.Get_loading = false;
         }
       });
 
     },
-    check_update: (state) => {
+    check_update: (state, verbose) => {
       let url =
         "https://api.github.com/repos/tokfrans03/VanLife/releases/latest";
       axios
         .get(url)
         .catch(error => {
-          state.snac_text = "Unable to reach network";
+          state.snac_text = error;
+          state.snac_color = "error";
           state.snac = true;
           state.load = false;
         })
@@ -114,7 +119,7 @@ const store = new Vuex.Store({
           state.load = false;
           if (response.data.tag_name != state.ver) {
             state.snac_text =
-              "Version " + response.data.tag_name + " available!";
+              "Version " + response.data.tag_name + " tillgänglig!";
             state.snac_color = "success";
             state.snac = true;
             state.updateavailable = true;
@@ -132,9 +137,11 @@ const store = new Vuex.Store({
               state.updateurl = response.data[0].browser_download_url
             })
           } else {
-            state.snac_text = "No new updates found";
-            state.snac_color = "success";
-            state.snac = true;
+            if (verbose) {
+              state.snac_text = "Senaste version installerad";
+              state.snac_color = "success";
+              state.snac = true;
+            }
           }
         });
     },

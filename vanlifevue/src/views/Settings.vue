@@ -13,7 +13,8 @@
             <v-btn class="ma-2" color="primary" @click="cons()">Sluta ladda</v-btn>
           </v-col>
           <v-col cols="auto">
-            <p class="display-1">MQTT:<p/>
+            <p class="display-1">MQTT:</p>
+            <p />
             <v-btn
               :disabled="Object.entries(config).length === 0"
               @click="connect()"
@@ -42,19 +43,25 @@
         <v-btn color="success" :loading="command_load" @click="send_command(command)">skicka</v-btn>
       </v-form>
       <v-card>
-        <div class="ma-8">{{command_out}}</div>
+        <p class="pa-4" id="command_out" />
       </v-card>
     </v-card>
 
     <v-card>
       <v-row>
         <v-col>
-          <v-card-title primary-title>Systemuppgradering</v-card-title>
+          <v-card-title primary-title>
+            Systemuppgradering
+            <v-btn class="ml-4" href="https://github.com/tokfrans03/VanLife/releases">
+              alla releaser
+              <v-icon class="ml-2">mdi-open-in-new</v-icon>
+            </v-btn>
+          </v-card-title>
           <v-btn
             class="ml-4"
             color="success"
             :loading="$store.state.load"
-            @click="check_update(); $store.state.load= true"
+            @click="check_update(true); $store.state.load= true"
           >kolla efter uppdatering</v-btn>
           <v-switch class="ml-4" label="Avancerat" v-model="advanced"></v-switch>
         </v-col>
@@ -73,9 +80,10 @@
           :loading="load1"
           @click="update(cross(ver))"
         >Uppgradera till {{ver}}</v-btn>
-        <v-alert type="warning" :value="true">
-          Versioner under 1.2.2 har inte https och är därför mycket sämre 
-        </v-alert>
+        <v-alert
+          type="warning"
+          :value="true"
+        >Versioner under 1.2.2 har inte https och är därför mycket sämre</v-alert>
 
         <v-card-title primary-title>Egen uppgradeings-url</v-card-title>
         <v-form class="pa-4">
@@ -111,7 +119,7 @@
           </v-card-actions>
         </v-card>
       </v-card-actions>
-      <v-alert type="warning" v-model="updating">Sida upgraderas, den kommer tillbaka snart</v-alert>
+      <v-alert type="warning" v-model="updating">Sida uppgraderas, den kommer tillbaka snart</v-alert>
     </v-card>
   </div>
 </template>
@@ -139,8 +147,7 @@ export default {
     advanced: false,
     url: "",
     command: "",
-    command_load: false,
-    command_out: ""
+    command_load: false
   }),
   computed: {
     ...mapGetters(["BackendUrl", "retry"])
@@ -165,7 +172,8 @@ export default {
           this.command_load = false;
         })
         .then(response => {
-          this.command_out = response.data.value;
+          document.getElementById("command_out").innerHTML =
+            response.data.value;
           this.command_load = false;
         });
     },
