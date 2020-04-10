@@ -10,7 +10,7 @@
           </v-col>
           <v-col cols="auto">
             <v-btn class="ma-2" color="yellow" @click="refreshconfig()">Refresh Backend</v-btn>
-            <v-btn class="ma-2" color="primary" @click="cons()">Console</v-btn>
+            <v-btn class="ma-2" color="primary" @click="cons()">Sluta ladda</v-btn>
           </v-col>
           <v-col cols="auto">
             <v-btn
@@ -33,6 +33,18 @@
       </v-form>
     </v-card>
 
+    <v-card class="my-4">
+      <v-card-title primary-title>Send command</v-card-title>
+      <v-form class="pa-4">
+        <v-text-field label="Command" v-model="command"></v-text-field>
+
+        <v-btn color="success" :loading="command_load" @click="send_command(command)">send</v-btn>
+      </v-form>
+      <v-card>
+        <div class="ma-8">{{command_out}}</div>
+      </v-card>
+    </v-card>
+
     <v-card>
       <v-row>
         <v-col>
@@ -50,15 +62,26 @@
         </v-col>
       </v-row>
       <v-card v-if="advanced" class="ma-4 lighten-2">
-        <v-card-title primary-title>
-          Egen upgradeings url
-        </v-card-title>
+        <v-card-title primary-title>Andra releaser</v-card-title>
+        <v-btn color="success" :loading="Get_all_load" @click="Get_all()">Hämta</v-btn>
+        <v-select class="px-2" :items="versions" label="Verisoner" v-model="ver"></v-select>
+
+        <v-btn
+          v-if="Boolean(ver)"
+          color="error"
+          :loading="load1"
+          @click="update(cross(ver))"
+        >Upgradera till {{ver}}</v-btn>
+
+        <v-card-title primary-title>Egen upgradeings url</v-card-title>
         <v-form class="pa-4">
-          <v-text-field
-            label="Url till zip"
-            v-model="url"
-          ></v-text-field>
-          <v-btn color="error" @click="update(url)">UpgraderaEgen upgradeings url</v-btn>
+          <v-text-field label="Url till zip" v-model="url"></v-text-field>
+          <v-btn
+            color="error"
+            v-if="Boolean(url)"
+            :loading="load1"
+            @click="update(url)"
+          >Upgradera med Egen url</v-btn>
         </v-form>
       </v-card>
       <v-card-actions v-if="$store.state.updateavailable" class="ma-4">
@@ -77,16 +100,14 @@
                 <v-btn
                   color="error"
                   :loading="load1"
-                  @click="update($store.state.updateurl); load1 = true"
+                  @click="update($store.state.updateurl)"
                 >update to {{$store.state.updateinfo.tag_name}}</v-btn>
-              </v-col>
-              <v-col>
-                <v-alert type="warning" v-model="updating">Sida upgraderas, den kommer tillbaka om ca 1 min</v-alert>
               </v-col>
             </v-row>
           </v-card-actions>
         </v-card>
       </v-card-actions>
+      <v-alert type="warning" v-model="updating">Sida upgraderas, den kommer tillbaka snart</v-alert>
     </v-card>
   </div>
 </template>
@@ -106,9 +127,16 @@ export default {
     connected: false,
     client: undefined,
     load1: false,
+    Get_all_load: false,
+    releases: [],
+    versions: [],
+    ver: "",
     updating: false,
     advanced: false,
-    url: ""
+    url: "",
+    command: "",
+    command_load: false,
+    command_out: ""
   }),
   computed: {
     ...mapGetters(["BackendUrl", "retry"])
@@ -119,11 +147,60 @@ export default {
       Get_geo: "Get_geo",
       check_update: "check_update"
     }),
+    send_command(command) {
+      this.command_load = true;
+      let data = {
+        action: "command",
+        value: command
+      };
+      axios
+        .post(this.$store.state.BackendUrl, data)
+        .catch(error => {
+          this.$store.snac_text = error;
+          this.$store.snac = true;
+          this.command_load = false;
+        })
+        .then(response => {
+          this.command_out = response.data.value;
+          this.command_load = false;
+        });
+    },
+    cross(ver) {
+      for (let index = 0; index < this.releases.length; index++) {
+        if (this.releases[index].ver == this.ver) {
+          return this.releases[index].url;
+        }
+      }
+    },
+    Get_all() {
+      let url = "https://api.github.com/repos/tokfrans03/VanLife/releases";
+      this.Get_all_load = true;
+      axios
+        .get(url)
+        .catch(error => {
+          this.$store.snac_text = error;
+          this.$store.snac = true;
+          this.Get_all_load = false;
+        })
+        .then(response => {
+          response.data.forEach(element => {
+            this.releases.push({
+              url: element.assets[0].browser_download_url,
+              ver: element.tag_name
+            });
+            this.versions.push(element.tag_name);
+          });
+          this.Get_all_load = false;
+        });
+    },
     update(url) {
+      console.log("Upgraderar till:", url);
       let data = {
         action: "update",
         value: url
       };
+      this.updating = true;
+      this.load1 = true;
       axios
         .post(this.$store.state.BackendUrl, data)
         .catch(error => {
@@ -134,12 +211,14 @@ export default {
         .then(response => {
           // console.log(response)
           this.load1 = false;
-          this.updating = true;
           this.$store.state.snac = true;
           this.$store.state.snac_text = response.data.value;
           this.$store.state.snac_color = response.data.Success
             ? "success"
             : "error";
+          setTimeout(() => {
+            location.reload();
+          }, 2000);
         });
     },
     refreshconfig() {
@@ -202,12 +281,14 @@ export default {
       this.$store.state.snac = true;
     },
     cons() {
-      if (this.check()) {
-        this.client.publish(
-          this.$store.state.config.mqtt.topics[0],
-          "HHHHHHeeelooooo"
-        );
-      }
+      // if (this.check()) {
+      //   this.client.publish(
+      //     this.$store.state.config.mqtt.topics[0],
+      //     "HHHHHHeeelooooo"
+      //   );
+      // }
+      this.$store.state.load = false;
+      this.$store.state.Get_loading = false;
     }
   }
 };

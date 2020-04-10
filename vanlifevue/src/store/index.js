@@ -2,15 +2,16 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from "axios";
 import moment from "moment";
-var geolocation = require("geolocation");
+var geo = require('html5-geolocation')();
 
 Vue.use(Vuex)
 
 const store = new Vuex.Store({
   state: {
-    BackendUrl: "http://localhost:8000/",
+    BackendUrl: "https://192.168.0.97:8000/",
     snac: false,
     snac_text: "",
+    snac_color: "",
     config: {},
     retry: false,
     personer: [],
@@ -18,7 +19,7 @@ const store = new Vuex.Store({
     stad: "Västerås",
     geo: "33.74,-84.39",
     weather: {},
-    ver: "1.2",
+    ver: "1.3",
     updateavailable: false,
     updateinfo: {},
     updateurl: "",
@@ -76,23 +77,27 @@ const store = new Vuex.Store({
         });
     },
     Get_geo: (state) => {
-      geolocation.getCurrentPosition(function (err, position) {
-        if (err) throw err;
-        // console.log(position);
-        state.geo = `${position.coords.latitude},${position.coords.longitude}`;
-        let url = `https://locationiq.org/v1/reverse.php?key=d93c7305de485e&lat=${position.coords.latitude}&lon=${position.coords.longitude}&format=json`;
-        axios
-          .get(url)
-          .catch(error => {
-            state.snac_text = "Unable to reach network";
-            state.snac = true;
-            state.Get_loading = false;
-          })
-          .then(response => {
-            state.stad = response.data.address.city
-            store.commit('Get_weather')
-          });
+      geo.get(function (err, position) {
+        if (!err) {
+          console.log('Position is:', position);
+          state.geo = `${position.coords.latitude},${position.coords.longitude}`;
+          let url = `https://locationiq.org/v1/reverse.php?key=d93c7305de485e&lat=${position.coords.latitude}&lon=${position.coords.longitude}&format=json`;
+          axios
+            .get(url)
+            .catch(error => {
+              state.snac_text = "Unable to reach network";
+              state.snac = true;
+              state.Get_loading = false;
+            })
+            .then(response => {
+              state.stad = response.data.address.city
+              store.commit('Get_weather')
+            });
+        } else {
+          console.log('Position unknown:', err.message);
+        }
       });
+
     },
     check_update: (state) => {
       let url =

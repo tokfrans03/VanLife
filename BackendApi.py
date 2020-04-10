@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
-# from send import send
+from send import send
 import requests
+import ssl
+import os
+import subprocess
 port = 8000
 config = {}
 manifest = []
-Allowed_actions = ["rf", "get", "notif", "addnotif", "removenotif", "update"]
+Allowed_actions = ["rf", "get", "notif", "addnotif", "removenotif", "update", "command"]
+config_file = 'config.json'
 
 
 def sendnotif(title, message, image=""):
@@ -34,15 +38,10 @@ def sendnotif(title, message, image=""):
     # else:
     #     url = "https://api.pushmealert.com?user="+user+"&key="+key+"&title="+title+"&message="+message+"&image=" + image
 
-def update(url):
-    import os
-    os.system("sh update.sh " + url)
-    exit()
-
 def refreshConfig():
     global config
     global manifest
-    with open('config.json') as json_file:
+    with open(config_file) as json_file:
         config = json.load(json_file)
         manifest = []
         for x in config:
@@ -98,6 +97,14 @@ def checkbody(body):
                 return [False, "Value must be a dict contaning a title and message"]
             if "name" not in body["value"]:
                 return [False, "Value must contain a name"]
+        
+        if body["action"] == "update":  # checks for update
+            if type(body["value"]) != str:
+                return [False, "Value must be a string"]
+
+        if body["action"] == "command":  # checks for removenotif
+            if type(body["value"]) != str:
+                return [False, "Value must be a string"]
 
         return [True]
     except:
@@ -175,6 +182,7 @@ class S(BaseHTTPRequestHandler):
                 body = json.loads(body)
                 if body["action"] == "rf":
                     send(body["value"])
+                    self.send_res("Done!")
                 # TODO
                 elif body["action"] == "notif":
                     try:
@@ -237,14 +245,18 @@ class S(BaseHTTPRequestHandler):
                 elif body["action"] == "update":
                     try:
                         url = body["value"]
-                        self.send_res("Upgraderar..." + url)
-                        update(url)
+                        self.send_res("Klar! laddar om...")
+                        os.system("sh update.sh " + url)
                         return
                     except Exception as e:
                         print(e)
                         self.send_res("Something went wrong: " +
                                       e, code=500, Success=False)
                         return
+                
+                elif body["action"] == "command":
+                    self.send_res(subprocess.run(body["value"].split(" "), stdout=subprocess.PIPE).stdout.decode('utf-8'))
+                    return
 
             else:  # Body is wrong
 
@@ -259,6 +271,8 @@ class S(BaseHTTPRequestHandler):
 def run(server_class=HTTPServer, handler_class=S, port=port):
     server_address = ('', port)
     httpd = server_class(server_address, handler_class)
+    httpd.socket = ssl.wrap_socket (httpd.socket, certfile='/root/.https-serve/server.pem' , server_side=True)
+    
     print('Starting httpd on port', port, '...')
     try:
         httpd.serve_forever()
