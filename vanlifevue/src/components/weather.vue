@@ -32,7 +32,7 @@
     <v-card-actions >
       <v-btn text :href="`https://www.smhi.se/q/${$store.state.stad}`" class="display-1">
         SMHI
-        <v-icon>mdi-open-in-new</v-icon>
+        <v-icon class="ml-2">mdi-open-in-new</v-icon>
       </v-btn>
     </v-card-actions>
   </v-card>
@@ -56,7 +56,7 @@ export default {
     winddir() {
       return (
         "transform: rotate(" +
-        this.$store.state.weather.windDirection +
+        (this.$store.state.weather.windDirection + 180) +
         "deg) scale(4);;"
       );
     }

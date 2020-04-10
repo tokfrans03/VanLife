@@ -19,7 +19,7 @@ const store = new Vuex.Store({
     stad: "Västerås",
     geo: "33.74,-84.39",
     weather: {},
-    ver: "1.3",
+    ver: "1.3.3",
     updateavailable: false,
     updateinfo: {},
     updateurl: "",
@@ -30,13 +30,14 @@ const store = new Vuex.Store({
     Get: (state, verbose, errors) => {
       state.Get_loading = true
       // console.log("GETTOINGG")
+      store.commit('check_update')
       axios
         .get(state.BackendUrl)
         .then(response => {
           // console.log(response);
           state.config = response.data.value.config;
           if (verbose) {
-            state.snac_text = "Loaded config";
+            state.snac_text = "Config laddad";
             state.snac = true;
           }
           state.retry = false;

@@ -1,18 +1,19 @@
 <template>
   <div class="home">
     <v-card dark class="my-2">
-      <v-card-title>Control Panel</v-card-title>
-      <v-text-field label="Backend Url" v-model="$store.state.BackendUrl" class="mx-4"></v-text-field>
+      <v-card-title>Kontrollpanel</v-card-title>
+      <v-text-field label="Backend URL" v-model="$store.state.BackendUrl" class="mx-4"></v-text-field>
       <v-card-actions>
         <v-row align="start" justify="space-between">
           <v-col v-if="$store.state.retry" cols="auto">
             <v-btn @click="Get(true)" :loading="$store.state.Get_loading" color="error">Retry</v-btn>
           </v-col>
           <v-col cols="auto">
-            <v-btn class="ma-2" color="yellow" @click="refreshconfig()">Refresh Backend</v-btn>
+            <v-btn class="ma-2" color="orange" @click="refreshconfig()">Refresh Backend</v-btn>
             <v-btn class="ma-2" color="primary" @click="cons()">Sluta ladda</v-btn>
           </v-col>
           <v-col cols="auto">
+            <p class="display-1">MQTT:<p/>
             <v-btn
               :disabled="Object.entries(config).length === 0"
               @click="connect()"
@@ -25,20 +26,20 @@
       </v-card-actions>
     </v-card>
     <v-card class="my-2">
-      <v-card-title primary-title>Location</v-card-title>
+      <v-card-title primary-title>Platsinfo</v-card-title>
       <v-form class="pa-4">
         <v-text-field label="Lat-long" v-model="$store.state.geo"></v-text-field>
         <v-text-field label="Stad" v-model="$store.state.stad"></v-text-field>
-        <v-btn color="success" @click="Get_geo()">Get current</v-btn>
+        <v-btn color="success" @click="Get_geo()">hämta nuvarande</v-btn>
       </v-form>
     </v-card>
 
     <v-card class="my-4">
-      <v-card-title primary-title>Send command</v-card-title>
+      <v-card-title primary-title>Skicka kommando</v-card-title>
       <v-form class="pa-4">
-        <v-text-field label="Command" v-model="command"></v-text-field>
+        <v-text-field label="Kommando" v-model="command"></v-text-field>
 
-        <v-btn color="success" :loading="command_load" @click="send_command(command)">send</v-btn>
+        <v-btn color="success" :loading="command_load" @click="send_command(command)">skicka</v-btn>
       </v-form>
       <v-card>
         <div class="ma-8">{{command_out}}</div>
@@ -48,17 +49,17 @@
     <v-card>
       <v-row>
         <v-col>
-          <v-card-title primary-title>Update files</v-card-title>
+          <v-card-title primary-title>Systemuppgradering</v-card-title>
           <v-btn
             class="ml-4"
             color="success"
             :loading="$store.state.load"
             @click="check_update(); $store.state.load= true"
-          >Check for update</v-btn>
-          <v-switch class="ml-4" label="Advancerat" v-model="advanced"></v-switch>
+          >kolla efter uppdatering</v-btn>
+          <v-switch class="ml-4" label="Avancerat" v-model="advanced"></v-switch>
         </v-col>
         <v-col cols="auto">
-          <span class="mr-4">version {{$store.state.ver}}</span>
+          <span class="mr-4">Version {{$store.state.ver}}</span>
         </v-col>
       </v-row>
       <v-card v-if="advanced" class="ma-4 lighten-2">
@@ -71,9 +72,12 @@
           color="error"
           :loading="load1"
           @click="update(cross(ver))"
-        >Upgradera till {{ver}}</v-btn>
+        >Uppgradera till {{ver}}</v-btn>
+        <v-alert type="warning" :value="true">
+          Versioner under 1.2.2 har inte https och är därför mycket sämre 
+        </v-alert>
 
-        <v-card-title primary-title>Egen upgradeings url</v-card-title>
+        <v-card-title primary-title>Egen uppgradeings-url</v-card-title>
         <v-form class="pa-4">
           <v-text-field label="Url till zip" v-model="url"></v-text-field>
           <v-btn
@@ -81,7 +85,7 @@
             v-if="Boolean(url)"
             :loading="load1"
             @click="update(url)"
-          >Upgradera med Egen url</v-btn>
+          >Uppgradera med Egen url</v-btn>
         </v-form>
       </v-card>
       <v-card-actions v-if="$store.state.updateavailable" class="ma-4">

@@ -5,7 +5,7 @@
       <div>
         <!-- <v-icon v-if="config.lamp">mdi-lightbulb-on</v-icon> <v-icon v-else>mdi-lightbulb-off</v-icon> -->
         <h3 class="headline mb-0">Lampor</h3>
-        <div>Kontrolera lamporna med dessa knappar</div>
+        <div>Kontrollera lamporna med dessa knappar</div>
       </div>
     </v-card-title>
     <v-card-actions>

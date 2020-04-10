@@ -1,11 +1,12 @@
 <template>
   <div>
     <v-card width="500" class="ma-4">
-      <v-form v-model="send" class="pa-4">
+      <v-card-title primary-title>Skicka notifikationer med PushMeAlert</v-card-title>
+      <v-form v-model="send" class="px-4">
         <v-text-field name="title" label="Titel" v-model="title" :rules="required_rule"></v-text-field>
-        <v-text-field name="message" label="Medelande" v-model="message" :rules="required_rule"></v-text-field>
+        <v-text-field name="message" label="Meddelande" v-model="message" :rules="required_rule"></v-text-field>
         <v-text-field name="img" label="Bild URL" v-model="img"></v-text-field>
-        <v-btn color="success" :loading="loading" :disabled="!send" @click="send_notif()">send</v-btn>
+        <v-btn color="success" :loading="loading" :disabled="!send" @click="send_notif()">skicka</v-btn>
       </v-form>
       <v-alert :color="response_color" :value="Boolean(response)">{{response}}</v-alert>
     </v-card>

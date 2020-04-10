@@ -16,7 +16,7 @@ export default [{
   },
   {
     path: '/Settings',
-    name: 'Settings',
+    name: 'Inställnignar',
     view: 'Settings',
   }
 
