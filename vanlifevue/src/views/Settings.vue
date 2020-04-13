@@ -29,7 +29,8 @@
     <v-card class="my-2">
       <v-card-title primary-title>Platsinfo</v-card-title>
       <v-form class="pa-4">
-        <v-text-field label="Lat-long" v-model="$store.state.geo"></v-text-field>
+        <v-text-field label="Lat-long" @change="geo_change()" v-model="$store.state.geo"></v-text-field>
+        <v-btn color="success" @click="Get_city()">Hämta stad</v-btn>
         <v-text-field label="Stad" v-model="$store.state.stad"></v-text-field>
         <v-btn color="success" @click="Get_geo()">hämta nuvarande</v-btn>
       </v-form>
@@ -156,8 +157,12 @@ export default {
     ...mapMutations({
       Get: "Get", // map `this.add()` to `this.$store.commit('increment')`
       Get_geo: "Get_geo",
+      Get_city: "Get_city",
       check_update: "check_update"
     }),
+    geo_change(){
+      localStorage.setItem('Geo', this.$store.state.geo)
+    },
     send_command(command) {
       this.command_load = true;
       let data = {

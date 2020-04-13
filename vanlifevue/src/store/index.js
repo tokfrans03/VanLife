@@ -19,12 +19,12 @@ const store = new Vuex.Store({
     stad: "Västerås",
     geo: "33.74,-84.39",
     weather: {},
-    ver: "1.4",
+    ver: "1.4.4",
     updateavailable: false,
     updateinfo: {},
     updateurl: "",
     time: "",
-    load: false
+    load: false,
   },
   mutations: {
     Get: (state, verbose, errors) => {
@@ -43,7 +43,7 @@ const store = new Vuex.Store({
           state.personer = []
           state.config.notif.forEach(person => {
             state.personer.push(person.name);
-          }); 
+          });
           store.commit('Get_geo')
           store.commit('check_update', errors)
 
@@ -82,27 +82,41 @@ const store = new Vuex.Store({
         if (!err) {
           console.log('Position is:', position);
           state.geo = `${position.coords.latitude},${position.coords.longitude}`;
-          let url = `https://locationiq.org/v1/reverse.php?key=d93c7305de485e&lat=${position.coords.latitude}&lon=${position.coords.longitude}&format=json`;
-          axios
-            .get(url)
-            .catch(error => {
-              state.snac_text = error;
-              state.snac_color = "error"
-              state.snac = true;
-              state.Get_loading = false;
-            })
-            .then(response => {
-              state.stad = response.data.address.city
-              store.commit('Get_weather')
-            });
+          localStorage.setItem('Geo', state.geo)
+          store.commit('Get_city')
         } else {
-          state.snac_text = 'Position okänd:', err.message;
+          console.log('Position okänd:', position);
+          let geo = localStorage.getItem('Geo');
+          state.geo = geo
+          store.commit('Get_city')
+          state.snac_text = 'Position okänd:' + String(err.message) + " Använder: " + geo;
           state.snac_color = "error"
           state.snac = true;
           state.Get_loading = false;
         }
       });
-
+    },
+    Get_city: (state) => {
+      let lat = state.geo.split(",")[0]
+      let long = state.geo.split(",")[1]
+      console.log(lat, long)
+      let url = `https://locationiq.org/v1/reverse.php?key=d93c7305de485e&lat=${lat}&lon=${long}&format=json`;
+      axios
+        .get(url)
+        .catch(error => {
+          state.snac_text = error;
+          state.snac_color = "error"
+          state.snac = true;
+          state.Get_loading = false;
+        })
+        .then(response => {
+          if ("city" in response.data.address) {
+            state.stad = response.data.address.city
+          } else {
+            state.stad = response.data.display_name.split(", ")[1]
+          }
+          store.commit('Get_weather')
+        });
     },
     check_update: (state, verbose) => {
       let url =
