@@ -1,17 +1,20 @@
 <template>
   <div>
-    <v-toolbar dark>
-      <v-toolbar-title>Vanlife</v-toolbar-title>
-
+    <v-toolbar dark prominent dense>
+      <span class="display-1 mt-7">Vanlife</span>
       <v-spacer></v-spacer>
-
-      <v-toolbar-items>
+      <v-toolbar-items id="scroll-target" class="overflow-x-auto">
         <v-btn :loading="$store.state.Get_loading" @click="Get(true);">
           <v-icon dark>mdi-refresh</v-icon>
         </v-btn>
         <v-btn v-for="(link, i) in links" :key="i" :to="link.path">
           {{link.name}}
-          <v-badge class="pa-1" v-if="$store.state.updateavailable & link.name == 'Inställnignar'" color="green" dot></v-badge>
+          <v-badge
+            class="pa-1"
+            v-if="$store.state.updateavailable & link.name == 'Inställnignar'"
+            color="green"
+            dot
+          ></v-badge>
         </v-btn>
       </v-toolbar-items>
     </v-toolbar>
