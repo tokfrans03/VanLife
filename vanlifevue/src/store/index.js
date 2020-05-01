@@ -8,7 +8,7 @@ Vue.use(Vuex)
 
 const store = new Vuex.Store({
   state: {
-    ver: "1.4.7",
+    ver: "1.4.8",
     BackendUrl: "https://192.168.0.97:8000/",
     snac: false,
     snac_text: "",
