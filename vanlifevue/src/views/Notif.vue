@@ -1,11 +1,12 @@
 <template>
   <div>
     <v-card width="500" class="ma-4">
-      <v-card-title primary-title>Skicka notifikationer med PushMeAlert</v-card-title>
+      <v-card-title primary-title>Skicka notifikationer med PushMeAlert </v-card-title>
+            <!-- <v-card-title primary-title>FUNKAR INTE ÄN, SKA FIXAAAA </v-card-title> -->
       <v-form v-model="send" class="px-4">
         <v-text-field name="title" label="Titel" v-model="title" :rules="required_rule"></v-text-field>
         <v-text-field name="message" label="Meddelande" v-model="message" :rules="required_rule"></v-text-field>
-        <v-text-field name="img" label="Bild URL" v-model="img"></v-text-field>
+        <!-- <v-text-field name="img" label="Bild URL" v-model="img"></v-text-field> -->
         <v-btn color="success" :loading="loading" :disabled="!send" @click="send_notif()">skicka</v-btn>
       </v-form>
       <v-alert :color="response_color" :value="Boolean(response)">{{response}}</v-alert>
@@ -14,8 +15,8 @@
       <v-card-title primary-title>Lägg till personer</v-card-title>
       <v-form class="px-4" v-model="add_form" ref="form">
         <v-text-field label="Namn" :rules="required_rule" v-model="name"></v-text-field>
-        <v-text-field label="User" :rules="required_rule" v-model="user"></v-text-field>
-        <v-text-field label="Key" :rules="required_rule" v-model="key"></v-text-field>
+        <!-- <v-text-field label="User" :rules="required_rule" v-model="user"></v-text-field> -->
+        <v-text-field label="Group ID" :rules="required_rule" v-model="group"></v-text-field>
       </v-form>
       <v-card-actions>
         <v-btn color="success" :loading="loading1" :disabled="!add_form" @click="add">lägg till</v-btn>
@@ -50,9 +51,9 @@ export default {
       loading2: false,
       title: "",
       message: "",
-      img: "",
-      user: "",
-      key: "",
+      // img: "",
+      // user: "",
+      group: "",
       name: "",
       required_rule: [v => !!v || "Required"],
       person: ""
@@ -70,13 +71,13 @@ export default {
         action: "addnotif",
         value: {
           user: this.user,
-          key: this.key,
-          name: this.name
+          group: this.group,
+          // name: this.name
         }
       };
       this.user = ""
-      this.key = ""
-      this.name = ""
+      this.group = ""
+      // this.name = ""
       this.$refs.form.reset()
       let self = this;
       this.loading1 = true;

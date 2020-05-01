@@ -15,7 +15,7 @@
         <span class="display-2 mx-4">{{$store.state.weather.windDirectionCardinal}}</span>
       </v-col>
       <v-col>
-        <v-icon class="ma-4" :style="winddir()">mdi-arrow-up</v-icon>
+        <v-icon class="ma-4" :style="windDirection">mdi-arrow-up</v-icon>
       </v-col>
       <!-- <v-col>
         <v-list-item>
@@ -44,10 +44,14 @@ import { mapMutations } from "vuex";
 
 export default {
   data() {
-    return {};
+    return {
+      windDirection: ""
+    };
   },
-  created() {
-
+  mounted() {
+    setInterval(() => {
+      this.windDirection = this.winddir()
+    }, 1000);
   },
   methods: {
     ...mapMutations({

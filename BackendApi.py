@@ -9,11 +9,12 @@ import subprocess
 port = 8000
 config = {}
 manifest = []
-Allowed_actions = ["rf", "get", "notif", "addnotif", "removenotif", "update", "command"]
+Allowed_actions = ["rf", "get", "notif",
+                   "addnotif", "removenotif", "update", "command"]
 config_file = 'config.json'
 
 
-def sendnotif(title, message, image=""):
+def sendnotif(title, message):
 
     urls = []
     names = []
@@ -21,22 +22,27 @@ def sendnotif(title, message, image=""):
 
     for x in config["notif"]:
         names.append(x["name"])
-        urls.append("https://api.pushmealert.com?user=" +
-                    x["user"]+"&key="+x["key"]+"&title="+title+"&message="+message)
+        urls.append("https://pushalarm.de/pushout.php?grouptoken=" +
+                    x["grouptoken"]+"&alert="+title+"&content="+message)
 
     for url, n in zip(urls, range(len(urls))):
-        res = json.loads(requests.get(url).text)
-        if res["status"] != 1:
+        # res = json.loads(requests.get(url).text)
+        # if res["status"] != 1:
+        #     errors.append(names[n])
+        res = requests.get(url).text
+        if "Notification successfully sent" not in res:
             errors.append(names[n])
+
     names = ", ".join(names)
     errors = ", ".join(errors)
-    if len(errors) != 0:
-        return [False, "Sent to " + names + ". but failed to send to " + errors + " (try reentering their user and key)"]
-    return [True, "Sent to " + names]
+    if errors:
+        return [False, "Skickat till " + names + ". Men misslyckades att skicka till " + errors + " (De kanske har bytt svar strukturen, fråga Martin)"]
+    return [True, "Skickat till " + names]
 
     # if image == "":
     # else:
     #     url = "https://api.pushmealert.com?user="+user+"&key="+key+"&title="+title+"&message="+message+"&image=" + image
+
 
 def refreshConfig():
     global config
@@ -85,19 +91,19 @@ def checkbody(body):
         if body["action"] == "addnotif":  # checks for addnotif
             if type(body["value"]) != dict:
                 return [False, "Value must be a dict contaning a title and message"]
-            if "user" not in body["value"]:
-                return [False, "Value must contain a user"]
-            if "key" not in body["value"]:
-                return [False, "Value must contain a key"]
+            # if "user" not in body["value"]:
+            #     return [False, "Value must contain a user"]
+            if "group" not in body["value"]:
+                return [False, "Value must contain a group"]
             if "name" not in body["value"]:
                 return [False, "Value must contain a name"]
 
         if body["action"] == "removenotif":  # checks for removenotif
             if type(body["value"]) != dict:
-                return [False, "Value must be a dict contaning a title and message"]
+                return [False, "Value must be a dict contaning a name"]
             if "name" not in body["value"]:
                 return [False, "Value must contain a name"]
-        
+
         if body["action"] == "update":  # checks for update
             if type(body["value"]) != str:
                 return [False, "Value must be a string"]
@@ -187,11 +193,8 @@ class S(BaseHTTPRequestHandler):
                 elif body["action"] == "notif":
                     try:
                         body = body["value"]
-                        if "imgurl" in body:
-                            res = sendnotif(
-                                body["title"], body["message"], image=body["imgurl"])
-                        else:
-                            res = sendnotif(body["title"], body["message"])
+
+                        res = sendnotif(body["title"], body["message"])
                         if res[0]:
                             self.send_res(res[1])  # success
                         else:  # error
@@ -234,14 +237,15 @@ class S(BaseHTTPRequestHandler):
                         if removed:
                             self.send_res("Tog bort till " + body["name"])
                         else:
-                            self.send_res("Hittade inte '" + body["name"]+ "'", Success=False)
+                            self.send_res("Hittade inte '" +
+                                          body["name"] + "'", Success=False)
                         return
                     except Exception as e:
                         print(e)
                         self.send_res("Something went wrong: " +
                                       e, code=500, Success=False)
                         return
-                
+
                 elif body["action"] == "update":
                     try:
                         url = body["value"]
@@ -253,9 +257,10 @@ class S(BaseHTTPRequestHandler):
                         self.send_res("Something went wrong: " +
                                       e, code=500, Success=False)
                         return
-                
+
                 elif body["action"] == "command":
-                    self.send_res(subprocess.run(body["value"].split(" "), stdout=subprocess.PIPE).stdout.decode('utf-8').replace("\n", "<br/>").replace(" ", "&nbsp;"))
+                    self.send_res(subprocess.run(body["value"].split(" "), stdout=subprocess.PIPE).stdout.decode(
+                        'utf-8').replace("\n", "<br/>").replace(" ", "&nbsp;"))
                     return
 
             else:  # Body is wrong
@@ -271,8 +276,9 @@ class S(BaseHTTPRequestHandler):
 def run(server_class=HTTPServer, handler_class=S, port=port):
     server_address = ('', port)
     httpd = server_class(server_address, handler_class)
-    httpd.socket = ssl.wrap_socket (httpd.socket, certfile='/root/.https-serve/server.pem' , server_side=True)
-    
+    httpd.socket = ssl.wrap_socket(
+        httpd.socket, certfile='/root/.https-serve/server.pem', server_side=True)
+
     print('Starting httpd on port', port, '...')
     try:
         httpd.serve_forever()

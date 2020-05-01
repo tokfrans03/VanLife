@@ -8,6 +8,7 @@ Vue.use(Vuex)
 
 const store = new Vuex.Store({
   state: {
+    ver: "1.4.7",
     BackendUrl: "https://192.168.0.97:8000/",
     snac: false,
     snac_text: "",
@@ -19,7 +20,6 @@ const store = new Vuex.Store({
     stad: "Västerås",
     geo: "33.74,-84.39",
     weather: {},
-    ver: "1.4.4",
     updateavailable: false,
     updateinfo: {},
     updateurl: "",

@@ -28,6 +28,12 @@ import { mapGetters, mapMutations } from "vuex";
 export default {
   data: () => ({}),
   mounted() {
+    let url = new URL(window.location.href);
+    url.port = "8000";
+    url.protocol = "https:"
+    url.pathname = "";
+    this.$store.state.BackendUrl = url.toString();
+    console.log(this.$store.state.BackendUrl);
     this.Get(true);
     setInterval(() => {
       this.Get(false, true);
