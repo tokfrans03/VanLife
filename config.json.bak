@@ -62,8 +62,10 @@
     "notif": [
         {
             "name": "",
-            "user": "",
-            "key": ""
+            "grouptoken": ""
         }
+    ],
+    "location": [
+        
     ]
 }

@@ -37,6 +37,7 @@ const store = new Vuex.Store({
           state.config = response.data.value.config;
           if (verbose) {
             state.snac_text = "Konfig laddad";
+            state.snac_color = "success"
             state.snac = true;
           }
           state.retry = false;
@@ -46,6 +47,7 @@ const store = new Vuex.Store({
           });
           store.commit('Get_geo')
           store.commit('check_update', errors)
+          
 
         })
         .catch(error => {
@@ -57,6 +59,13 @@ const store = new Vuex.Store({
           state.retry = true;
           state.Get_loading = false
         });
+    },
+    Send_location: (state) => {
+      let data = {
+        action: "location",
+        value: state.geo
+      }
+      axios.post(state.BackendUrl, data)
     },
     Get_weather: (state) => {
       let url =
@@ -84,6 +93,7 @@ const store = new Vuex.Store({
           state.geo = `${position.coords.latitude},${position.coords.longitude}`;
           localStorage.setItem('Geo', state.geo)
           store.commit('Get_city')
+          store.commit('Send_location')
         } else {
           console.log('Position okänd:', position);
           let geo = localStorage.getItem('Geo');

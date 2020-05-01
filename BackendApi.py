@@ -6,12 +6,14 @@ import requests
 import ssl
 import os
 import subprocess
+import datetime
 port = 8000
 config = {}
 manifest = []
 Allowed_actions = ["rf", "get", "notif",
-                   "addnotif", "removenotif", "update", "command"]
+                   "addnotif", "removenotif", "update", "command", "location"]
 config_file = 'config.json'
+location_file = 'platser.json'
 
 
 def sendnotif(title, message):
@@ -109,6 +111,10 @@ def checkbody(body):
                 return [False, "Value must be a string"]
 
         if body["action"] == "command":  # checks for removenotif
+            if type(body["value"]) != str:
+                return [False, "Value must be a string"]
+
+        if body["action"] == "location":  # checks for removenotif
             if type(body["value"]) != str:
                 return [False, "Value must be a string"]
 
@@ -231,7 +237,7 @@ class S(BaseHTTPRequestHandler):
                             if x["name"] == body["name"]:
                                 config["notif"].pop(n)
                                 removed = True
-                        with open("config.json", "w+", encoding='utf-8') as json_file:
+                        with open(config_file, "w+", encoding='utf-8') as json_file:
                             json.dump(config, json_file)
                         refreshConfig()
                         if removed:
@@ -262,6 +268,21 @@ class S(BaseHTTPRequestHandler):
                     self.send_res(subprocess.run(body["value"].split(" "), stdout=subprocess.PIPE).stdout.decode(
                         'utf-8').replace("\n", "<br/>").replace(" ", "&nbsp;"))
                     return
+
+                elif body["action"] == "location":
+                    datum = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+
+                    with open(location_file) as loc_file:
+                        loc = json.load(loc_file)
+
+                    loc["locations"].append([body["value"], datum])
+
+                    with open(location_file, "w+", encoding='utf-8') as loc_file:
+                        json.dump(loc, loc_file)
+
+                    self.send_res("Plats sparad")
+                    return
+
 
             else:  # Body is wrong
 

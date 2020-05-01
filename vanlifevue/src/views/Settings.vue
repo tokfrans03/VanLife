@@ -6,7 +6,11 @@
       <v-card-actions>
         <v-row align="start" justify="space-between">
           <v-col v-if="$store.state.retry" cols="auto">
-            <v-btn @click="Get(true)" :loading="$store.state.Get_loading" color="error">Retry</v-btn>
+            <v-btn
+              @click="mid_Get(true)"
+              :loading="$store.state.Get_loading"
+              color="error"
+            >Retry</v-btn>
           </v-col>
           <v-col cols="auto">
             <v-btn class="ma-2" color="orange" @click="refreshconfig()">Refresh Backend</v-btn>
@@ -160,8 +164,12 @@ export default {
       Get_city: "Get_city",
       check_update: "check_update"
     }),
-    geo_change(){
-      localStorage.setItem('Geo', this.$store.state.geo)
+    mid_Get(a){
+      localStorage.setItem('BackendUrl', this.$store.state.BackendUrl)
+      this.Get(a)
+    },
+    geo_change() {
+      localStorage.setItem("Geo", this.$store.state.geo);
     },
     send_command(command) {
       this.command_load = true;
