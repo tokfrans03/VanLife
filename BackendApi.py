@@ -275,7 +275,7 @@ class S(BaseHTTPRequestHandler):
                     with open(location_file) as loc_file:
                         loc = json.load(loc_file)
 
-                    loc["locations"].append([body["value"], datum])
+                    loc["locations"].append({"location": body["value"], "date": datum})
 
                     with open(location_file, "w+", encoding='utf-8') as loc_file:
                         json.dump(loc, loc_file)
