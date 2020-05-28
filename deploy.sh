@@ -26,15 +26,16 @@ npm run build
 
 echo "Zipping..."
 cd -
-mv vanlifevue/dist www
 
-mkdir www/Settings www/Notif www/Lampor 
+mv vanlifevue/dist/ www
 
-echo '<meta http-equiv="Refresh" content="0; url=https://192.168.0.97/" />' > www/Settings/index.html
-echo '<meta http-equiv="Refresh" content="0; url=https://192.168.0.97/" />' > www/Notif/index.html
-echo '<meta http-equiv="Refresh" content="0; url=https://192.168.0.97/" />' > www/Lampor/index.html
+# mkdir www/Settings www/Notif www/Lampor 
 
-zip van.zip -r www/ BackendApi.py Mqtt_relay.py send.py update.sh
+# echo '<meta http-equiv="Refresh" content="0; url=https://192.168.0.97/" />' > www/Settings/index.html
+# echo '<meta http-equiv="Refresh" content="0; url=https://192.168.0.97/" />' > www/Notif/index.html
+# echo '<meta http-equiv="Refresh" content="0; url=https://192.168.0.97/" />' > www/Lampor/index.html
+
+zip van.zip -r www/ BackendApi.py Mqtt_relay.py send.py
 rm -r www
 
 echo "Uploading..."
